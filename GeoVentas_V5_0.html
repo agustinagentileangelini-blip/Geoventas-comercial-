@@ -1,0 +1,2775 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoVentas V5.0 - Gestión Comercial</title>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+
+/* Leaflet CSS embebido para evitar fallos al abrir desde archivos locales */
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,
+.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{
+  position:absolute;left:0;top:0;
+}
+.leaflet-container{overflow:hidden;position:relative;outline-offset:1px;background:#ddd;-webkit-tap-highlight-color:transparent}
+.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-user-drag:none}
+.leaflet-tile::selection{background:transparent}
+.leaflet-safari .leaflet-tile{image-rendering:-webkit-optimize-contrast}
+.leaflet-safari .leaflet-tile-container{width:1600px;height:1600px;-webkit-transform-origin:0 0}
+.leaflet-marker-icon,.leaflet-marker-shadow{display:block}
+.leaflet-container .leaflet-overlay-pane svg{max-width:none!important;max-height:none!important}
+.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile{max-width:none!important;max-height:none!important;width:auto;padding:0}
+.leaflet-container.leaflet-touch-zoom{-ms-touch-action:pan-x pan-y;touch-action:pan-x pan-y}
+.leaflet-container.leaflet-touch-drag{-ms-touch-action:pinch-zoom;touch-action:none;touch-action:pinch-zoom}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{-ms-touch-action:none;touch-action:none}
+.leaflet-container{-webkit-tap-highlight-color:transparent}
+.leaflet-container a{-webkit-tap-highlight-color:rgba(51,181,229,.4)}
+.leaflet-tile{filter:inherit;visibility:hidden}
+.leaflet-tile-loaded{visibility:inherit}
+.leaflet-zoom-box{width:0;height:0;-moz-box-sizing:border-box;box-sizing:border-box;z-index:800}
+.leaflet-overlay-pane svg{-moz-user-select:none}
+.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
+.leaflet-map-pane canvas{z-index:100}.leaflet-map-pane svg{z-index:200}
+.leaflet-vml-shape{width:1px;height:1px}.lvml{behavior:url(#default#VML);display:inline-block;position:absolute}
+.leaflet-control{position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+.leaflet-control{float:left;clear:both}.leaflet-right .leaflet-control{float:right}.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}
+.leaflet-control-zoom a{display:block;text-align:center;text-decoration:none;width:30px;height:30px;line-height:30px;background:#fff;color:#000;font-size:22px;border-bottom:1px solid #ccc}
+.leaflet-control-zoom a:first-child{border-radius:4px 4px 0 0}.leaflet-control-zoom a:last-child{border-radius:0 0 4px 4px;border-bottom:0}
+.leaflet-control-attribution{padding:0 5px;color:#333;background:rgba(255,255,255,.8);font-size:11px}
+.leaflet-control-attribution a{text-decoration:none;color:#0078a8}
+.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px;background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.4)}
+.leaflet-popup-content{margin:13px 20px;line-height:1.3;font-size:13px;min-height:1px}.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-top:-1px;margin-left:-20px;overflow:hidden;pointer-events:none}
+.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg);background:#fff;box-shadow:3px 3px 15px rgba(0,0,0,.4)}
+.leaflet-popup-close-button{position:absolute;top:0;right:0;border:none;text-align:center;width:24px;height:24px;font:16px/24px Tahoma,Verdana,sans-serif;color:#757575;text-decoration:none;background:transparent}
+.leaflet-tooltip{position:absolute;padding:6px;background:#fff;border:1px solid #fff;border-radius:3px;color:#222;white-space:nowrap;user-select:none;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+
+    :root{
+      --nav:#071a33;
+      --nav2:#0b2344;
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#10203d;
+      --muted:#6b7280;
+      --border:#e4e8ef;
+      --blue:#1769e8;
+      --green:#16863b;
+      --green2:#64be36;
+      --teal:#1098ad;
+      --yellow:#ffb000;
+      --orange:#ff7a00;
+      --red:#ee3124;
+      --gray:#9aa3b2;
+      --shadow:0 8px 28px rgba(16,32,61,.08);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+
+    aside{
+      background:linear-gradient(180deg,var(--nav),var(--nav2));
+      color:#fff;
+      padding:22px 16px;
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
+
+    .brand{display:flex;align-items:center;gap:12px;padding:4px 6px 18px}
+    .brand-icon{
+      width:40px;height:40px;border-radius:14px 14px 18px 18px;
+      background:linear-gradient(135deg,#1dc2b7,#146ce2);
+      display:grid;place-items:center;font-size:22px
+    }
+    .brand h1{font-size:24px;margin:0}
+    .brand small{display:block;color:#55d46b;font-size:10px;margin-top:3px;letter-spacing:.8px}
+
+    nav{display:grid;gap:8px}
+    .nav-item{
+      display:flex;align-items:center;gap:11px;
+      color:#eaf0fb;text-decoration:none;padding:12px 13px;border-radius:10px;
+      font-size:15px
+    }
+    .nav-item.active{background:#1266dd}
+    .nav-item:hover{background:rgba(255,255,255,.08)}
+    .nav-icon{width:22px;text-align:center}
+
+    .zone-card{
+      margin-top:auto;border:1px solid rgba(255,255,255,.16);
+      padding:14px;border-radius:14px;background:rgba(255,255,255,.03)
+    }
+    .zone-card small{color:#54cf65}
+    .zone-card strong{display:block;font-size:18px;margin:8px 0 4px}
+    .zone-card span{color:#d7e1f0;font-size:14px}
+    .zone-card button{
+      width:100%;margin-top:14px;padding:9px;border:1px solid rgba(255,255,255,.25);
+      border-radius:9px;background:transparent;color:white;cursor:pointer
+    }
+
+    main{padding:22px;min-width:0}
+
+    .topbar{
+      display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:18px
+    }
+    .title h2{font-size:30px;margin:0 0 5px}
+    .title p{margin:0;color:var(--muted)}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap}
+    select,button{
+      border:1px solid var(--border);background:#fff;border-radius:10px;padding:10px 13px;
+      color:var(--text);font-size:14px
+    }
+    button{cursor:pointer}
+
+    .kpis{
+      display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px
+    }
+    .card,.kpi{
+      background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)
+    }
+    .kpi{padding:16px;min-height:145px}
+    .kpi label{font-size:12px;font-weight:700;color:var(--text);display:block;line-height:1.35}
+    .kpi strong{display:block;font-size:37px;margin:13px 0 6px}
+    .kpi small{color:var(--muted)}
+    .positive{color:var(--green)}
+    .warning{color:var(--orange)}
+    .blue{color:var(--blue)}
+
+    .content-grid{
+      display:grid;grid-template-columns:minmax(0,1.55fr) minmax(340px,.95fr);
+      gap:16px;align-items:start
+    }
+    .left-col,.right-col{display:grid;gap:16px}
+
+    .card{padding:16px}
+    .card h3{margin:0 0 14px;font-size:16px}
+
+    .product-development{
+      display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:center
+    }
+
+    .donut-wrap{display:grid;place-items:center}
+    .donut{
+      width:290px;height:290px;border-radius:50%;
+      position:relative;
+      background:conic-gradient(
+        var(--green) 0deg 66deg,
+        var(--green2) 66deg 129deg,
+        var(--teal) 129deg 187deg,
+        #1889c7 187deg 242deg,
+        var(--yellow) 242deg 281deg,
+        var(--orange) 281deg 316deg,
+        #ff5b00 316deg 329deg,
+        var(--red) 329deg 338deg,
+        var(--gray) 338deg 340deg,
+        #c3cad4 340deg 360deg
+      );
+      box-shadow:inset 0 0 0 2px white
+    }
+    .donut::after{
+      content:"";position:absolute;inset:82px;border-radius:50%;
+      background:white;box-shadow:0 0 0 1px var(--border);
+    }
+    .donut-center{
+      position:absolute;z-index:2;inset:0;display:grid;place-content:center;text-align:center
+    }
+    .donut-center small{font-weight:700}
+    .donut-center strong{font-size:36px;color:var(--green);margin:6px 0}
+    .donut-center span{font-size:13px;font-weight:700;color:var(--green)}
+
+    .product-list{display:grid;gap:8px}
+    .product-row{
+      display:grid;grid-template-columns:16px 1fr 54px 110px 34px;
+      gap:10px;align-items:center;font-size:14px;padding:4px 0
+    }
+    .dot{width:12px;height:12px;border-radius:50%}
+    .product-name{font-weight:700}
+    .state{
+      font-size:11px;font-weight:700;border-radius:999px;padding:5px 9px;text-align:center
+    }
+    .state.green{background:#e9f7ec;color:var(--green)}
+    .state.teal{background:#e7f7fa;color:#087f92}
+    .state.yellow{background:#fff4d8;color:#bb7d00}
+    .state.orange{background:#fff0e2;color:#db6500}
+    .state.red{background:#fee9e7;color:#c2261c}
+    .state.gray{background:#eef1f5;color:#687386}
+    .eye{
+      width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+      display:grid;place-items:center;background:#fff;cursor:pointer
+    }
+
+    .legend{
+      display:flex;gap:18px;flex-wrap:wrap;border-top:1px solid var(--border);
+      margin-top:16px;padding-top:13px;font-size:11px;color:var(--muted)
+    }
+    .legend div{display:flex;align-items:center;gap:6px}
+
+    .opportunity{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
+    .opportunity:last-child{border-bottom:0}
+    .opp-icon{
+      width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+      color:white;flex:0 0 26px;font-weight:700
+    }
+
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:left}
+    th{font-size:11px;color:var(--muted);font-weight:700}
+    .status-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+
+    .actions-list{display:grid;gap:10px;font-size:14px}
+    .action-item{display:flex;gap:9px;align-items:flex-start}
+    .check{
+      width:18px;height:18px;border-radius:4px;background:#31a84b;color:white;
+      display:grid;place-items:center;font-size:12px;flex:0 0 18px
+    }
+
+    .chart{
+      height:180px;position:relative;padding:22px 18px 20px 42px
+    }
+    .gridline{
+      position:absolute;left:42px;right:18px;height:1px;background:#e8ecf2
+    }
+    .gridline.g1{top:28px}.gridline.g2{top:74px}.gridline.g3{top:120px}.gridline.g4{top:166px}
+    .axis-label{
+      position:absolute;left:7px;font-size:11px;color:var(--muted)
+    }
+    .axis-label.a1{top:20px}.axis-label.a2{top:66px}.axis-label.a3{top:112px}.axis-label.a4{top:158px}
+    svg{width:100%;height:100%;overflow:visible}
+    .chart-labels{display:flex;justify-content:space-around;font-size:11px;color:var(--muted);margin-top:-4px}
+
+    .footer-note{text-align:center;color:#98a1af;font-size:11px;margin-top:14px}
+
+    @media(max-width:1150px){
+      .kpis{grid-template-columns:repeat(3,1fr)}
+      .content-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:850px){
+      .app{grid-template-columns:1fr}
+      aside{display:none}
+      .kpis{grid-template-columns:1fr 1fr}
+      .product-development{grid-template-columns:1fr}
+      .topbar{flex-direction:column}
+    }
+    @media(max-width:560px){
+      main{padding:12px}
+      .kpis{grid-template-columns:1fr}
+      .product-row{grid-template-columns:14px 1fr 46px}
+      .state,.eye{display:none}
+      .donut{width:245px;height:245px}
+      .donut::after{inset:68px}
+    }
+
+    .import-panel{
+      display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;
+      padding:16px;margin-bottom:16px;background:linear-gradient(135deg,#ffffff,#f5f9ff);
+      border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)
+    }
+    .import-title{font-size:16px;font-weight:800;margin-bottom:5px}
+    .import-help{font-size:12px;color:var(--muted);line-height:1.5}
+    .import-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+    .primary-btn{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:700}
+    .secondary-btn{background:#fff;font-weight:700}
+    .file-input{display:none}
+    .data-status{
+      margin-top:10px;padding:9px 11px;border-radius:9px;background:#eef4ff;
+      color:#264a7c;font-size:12px;display:none
+    }
+    .data-status.ok{background:#eaf7ed;color:#176b2d}
+    .data-status.error{background:#feeceb;color:#a92b22}
+    #salesMap{height:430px;border-radius:12px;border:1px solid var(--border);overflow:hidden}
+    .map-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .map-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+    .map-legend span{display:flex;align-items:center;gap:5px}
+    .map-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .empty-state{padding:20px;text-align:center;color:var(--muted);font-size:13px}
+    @media(max-width:850px){.import-panel{grid-template-columns:1fr}.import-actions{justify-content:flex-start}}
+
+
+    /* Corrección Leaflet en celulares y archivos locales */
+    .leaflet-container{font-family:Inter,Segoe UI,Arial,sans-serif;background:#e8eef5}
+    .leaflet-container img,
+    .leaflet-tile,
+    .leaflet-marker-icon,
+    .leaflet-marker-shadow{
+      max-width:none !important;
+      max-height:none !important;
+    }
+    .leaflet-tile-container{will-change:transform}
+    #salesMap{width:100%;height:440px;min-height:440px;position:relative}
+    @media(max-width:600px){#salesMap{height:360px;min-height:360px}}
+
+    .view-tabs{
+      display:flex;gap:8px;margin-bottom:16px;padding:5px;background:#e9eef6;
+      border-radius:12px;width:max-content;max-width:100%
+    }
+    .view-tab{
+      border:0;background:transparent;padding:10px 16px;border-radius:9px;
+      font-weight:800;color:#566176
+    }
+    .view-tab.active{background:#fff;color:var(--blue);box-shadow:0 3px 10px rgba(16,32,61,.10)}
+    .app-view.hidden{display:none}
+    .commercial-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:16px}
+    .commercial-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.85fr);gap:16px}
+    .commercial-left,.commercial-right{display:grid;gap:16px;align-content:start}
+    .week-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
+    .channel-bar{height:18px;border-radius:999px;overflow:hidden;background:#edf1f6;display:flex;margin:12px 0 7px}
+    .channel-traditional{background:var(--blue)}
+    .channel-digital{background:var(--green)}
+    .mini-bars{display:grid;gap:11px}
+    .mini-bar-row{display:grid;grid-template-columns:minmax(130px,1fr) 2fr 70px;gap:10px;align-items:center;font-size:12px}
+    .mini-track{height:12px;background:#edf1f5;border-radius:999px;overflow:hidden}
+    .mini-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--teal))}
+    .seller-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .seller-card{border:1px solid var(--border);border-radius:11px;padding:11px;background:#fff}
+    .seller-card strong{display:block;font-size:18px;margin-top:5px}
+    .commercial-note{font-size:12px;color:var(--muted);line-height:1.5}
+    @media(max-width:1150px){
+      .commercial-kpis{grid-template-columns:repeat(3,1fr)}
+      .commercial-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:700px){
+      .commercial-kpis{grid-template-columns:repeat(2,1fr)}
+      .seller-grid{grid-template-columns:1fr}
+      .mini-bar-row{grid-template-columns:1fr 1.5fr 60px}
+    }
+
+
+    .offline-map{position:relative;height:410px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:linear-gradient(#eaf4ff,#f8fbff)}
+    .offline-map svg{width:100%;height:100%;display:block}.map-region{fill:#dce8d2;stroke:#b9c8ac;stroke-width:1.5}.map-river{fill:none;stroke:#8ac7e8;stroke-width:12}.map-road{fill:none;stroke:#c7ccd4;stroke-width:2;stroke-dasharray:6 5}.map-city-label{font-size:12px;font-weight:700;fill:#344054}.map-marker{cursor:pointer;filter:drop-shadow(0 2px 3px rgba(0,0,0,.22))}.map-tip{position:absolute;display:none;z-index:3;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;box-shadow:0 10px 25px rgba(0,0,0,.18);font-size:12px;min-width:180px}.map-note{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:9px;padding:9px;font-size:12px;color:var(--muted)}
+    .seller-dashboard{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.seller-grid-main{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);gap:16px}.seller-ranking{display:grid;gap:10px}.seller-row{display:grid;grid-template-columns:36px minmax(110px,1fr) 2fr 72px;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:10px}.seller-pos{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#eef4ff;color:var(--blue);font-weight:800}.seller-progress{height:12px;background:#edf1f5;border-radius:999px;overflow:hidden}.seller-progress div{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:999px}.seller-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.seller-chip{font-size:10px;background:#f1f5f9;padding:3px 6px;border-radius:999px;color:#4b5563}@media(max-width:900px){.seller-dashboard{grid-template-columns:repeat(2,1fr)}.seller-grid-main{grid-template-columns:1fr}}
+  
+    .province-map{position:relative;padding-top:82px}
+    .province-map-header{
+      position:absolute;z-index:3;top:14px;left:16px;right:16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:rgba(255,255,255,.92);border:1px solid var(--border);
+      border-radius:11px;padding:10px 13px;backdrop-filter:blur(4px)
+    }
+    .province-map-kicker{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.8px}
+    #provinceMapTitle{font-size:20px;color:var(--navy)}
+    .province-map-scope{
+      padding:7px 10px;border-radius:999px;background:#eef4ff;color:var(--blue);
+      font-size:11px;font-weight:800;text-align:center
+    }
+    #provinceMapSvg{width:100%;height:100%;display:block}
+    .province-city-marker{cursor:pointer;filter:url(#markerShadow)}
+    .province-city-label{font-size:11px;font-weight:800;fill:#344054;pointer-events:none}
+    .province-single-focus{font-size:22px;font-weight:900;fill:#172b4d}
+    @media(max-width:600px){
+      .province-map{padding-top:94px}
+      .province-map-header{align-items:flex-start;flex-direction:column}
+      .province-map-scope{align-self:flex-start}
+    }
+
+
+    .kpi.clickable{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;border:2px solid transparent}
+    .kpi.clickable:active{transform:scale(.99)}
+    .kpi.clickable.open{border-color:#b8cdf8;box-shadow:0 10px 26px rgba(30,104,230,.12)}
+    .kpi-hint{margin-top:10px;font-size:11px;font-weight:800;color:var(--blue)}
+    .kpi-inline-detail{
+      display:none;margin-top:14px;padding-top:13px;border-top:1px solid var(--border);
+      text-align:left;font-size:12px
+    }
+    .kpi.open .kpi-inline-detail{display:block}
+    .kpi-detail-row{
+      display:flex;justify-content:space-between;gap:10px;padding:8px 0;
+      border-bottom:1px solid #edf0f5
+    }
+    .kpi-detail-row:last-child{border-bottom:0}
+    .kpi-detail-row span{color:var(--muted)}
+    .province-city-marker.selected circle:first-child{stroke:#1869e8;stroke-width:7}
+    .province-city-label.selected{fill:#1869e8;font-size:13px}
+    .province-map-note-strong{font-weight:800;color:var(--navy)}
+
+
+    .real-map-loading{
+      position:absolute;inset:82px 0 0 0;display:grid;place-items:center;
+      background:rgba(238,247,255,.9);z-index:2;color:var(--muted);
+      font-weight:700;text-align:center;padding:20px
+    }
+    .real-map-loading.hidden{display:none}
+    .province-real-shape{fill:#dcebcf;stroke:#8faa7b;stroke-width:2.2}
+    .province-department-line{fill:none;stroke:#b9c7b0;stroke-width:1;stroke-dasharray:4 4}
+    .real-city-point{cursor:pointer;filter:drop-shadow(0 2px 3px rgba(0,0,0,.22))}
+    .real-city-label{font-size:10px;font-weight:800;fill:#26364d;pointer-events:none}
+    .real-map-source{font-size:10px;color:var(--muted);margin-top:6px}
+
+
+    .product-map-legend{row-gap:8px}
+    .product-map-legend span{white-space:nowrap}
+    .distributor-marker{cursor:pointer;filter:url(#distShadow)}
+    .distributor-marker-label{font-size:11px;font-weight:800;fill:#24344b;pointer-events:none}
+    .distributor-marker-sub{font-size:9px;font-weight:700;fill:#687386;pointer-events:none}
+    .map-tip .tip-line{display:flex;justify-content:space-between;gap:12px;margin-top:5px}
+    .map-tip .tip-chip{display:inline-block;padding:4px 7px;border-radius:999px;color:#fff;font-size:10px;font-weight:800;margin-top:7px}
+
+
+    .street-map-pin{
+      position:absolute;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;
+      width:32px;height:32px;border-radius:50% 50% 50% 0;rotate:-45deg;
+      border:4px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)
+    }
+    .street-map-pin::after{
+      content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:#fff;
+      left:50%;top:50%;transform:translate(-50%,-50%)
+    }
+    .street-map-pin-label{
+      position:absolute;transform:translate(14px,-35px);background:rgba(255,255,255,.94);
+      border:1px solid #dbe2ea;border-radius:8px;padding:5px 7px;white-space:nowrap;
+      font-size:10px;font-weight:800;color:#21324a;box-shadow:0 3px 9px rgba(0,0,0,.14)
+    }
+    @media(max-width:600px){.street-map-pin-label{font-size:9px}}
+
+
+    .street-map-pin.pdv{width:22px;height:22px;border-width:3px}
+    .street-map-pin.pdv:after{width:7px;height:7px}
+    .street-map-pin-label.pdv-label{font-size:10px;font-weight:700;padding:4px 7px}
+    .map-type-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0 0;font-size:11px;color:var(--muted)}
+    .map-type-symbol{display:inline-block;border-radius:50%;vertical-align:middle;margin-right:5px;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+    .map-type-symbol.dist{width:16px;height:16px;background:#8e44ad}
+    .map-type-symbol.pdv{width:10px;height:10px;background:#36a9e1}
+#coverageMap{
+      width:100%;height:100%;display:block;background:#eef7ff
+    }
+@media(max-width:650px){
+}
+
+
+    #realSalesMap{
+      position:relative;
+      box-sizing:border-box;
+      width:100%;
+      height:500px;
+      min-height:500px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      overflow:hidden;
+      background:#eaf2f8;
+    }
+    .leaflet-container{font-family:Inter,Segoe UI,Arial,sans-serif}
+    .map-panel-header{
+      display:flex;justify-content:space-between;gap:14px;align-items:flex-start;
+      margin-bottom:12px;flex-wrap:wrap
+    }
+    .map-panel-header small{display:block;color:var(--muted);font-weight:800;letter-spacing:.5px}
+    .map-panel-header strong{display:block;font-size:21px;margin-top:2px}
+    .map-status{
+      margin-top:10px;padding:10px 12px;border-radius:10px;background:#f7f9fc;
+      border:1px solid var(--border);font-size:12px;color:var(--muted)
+    }
+    .dist-pin{
+      width:24px;height:24px;border-radius:50%;border:4px solid #fff;
+      box-shadow:0 2px 8px rgba(0,0,0,.30)
+    }
+    .pdv-pin{
+      width:14px;height:14px;border-radius:50%;border:3px solid #fff;
+      box-shadow:0 2px 7px rgba(0,0,0,.25)
+    }
+    .map-popup-title{font-weight:900;font-size:14px;margin-bottom:5px}
+    .map-popup-row{margin-top:4px}
+    @media(max-width:650px){#realSalesMap{height:430px;min-height:430px}}
+
+
+    .leaflet-control-attribution{display:none!important}
+    .leaflet-bottom.leaflet-right{display:none!important}
+    .leaflet-container img{max-width:none!important;max-height:none!important}
+    .leaflet-control-container img{display:none!important}
+    .coverage-legend{
+      display:flex;gap:14px;flex-wrap:wrap;margin:10px 0 14px;
+      padding:9px 11px;background:#f7f9fc;border:1px solid var(--border);
+      border-radius:10px;font-size:11px;color:var(--muted)
+    }
+    .coverage-legend span{display:flex;align-items:center;gap:6px}
+    .coverage-legend i{
+      width:17px;height:11px;border-radius:4px;display:inline-block;opacity:.42;
+      border:2px dashed currentColor
+    }
+
+
+    #realSalesMap .leaflet-map-pane,
+    #realSalesMap .leaflet-tile-pane,
+    #realSalesMap .leaflet-overlay-pane,
+    #realSalesMap .leaflet-marker-pane{
+      position:absolute!important;left:0!important;top:0!important
+    }
+    #realSalesMap .leaflet-tile{
+      width:256px!important;height:256px!important;margin:0!important;
+      padding:0!important;border:0!important;object-fit:none!important
+    }
+
+
+    .map-panel-header{margin-top:6px}
+    #realSalesMap{margin-top:4px}
+    .coverage-legend{margin-top:4px}
+
+
+    #realSalesMap{
+      width:100%!important;
+      height:500px!important;
+      min-height:500px!important;
+      position:relative!important;
+      display:block!important;
+      overflow:hidden!important;
+      background:#dfeaf2!important;
+    }
+    #realSalesMap .leaflet-pane,
+    #realSalesMap .leaflet-map-pane,
+    #realSalesMap .leaflet-tile-pane,
+    #realSalesMap .leaflet-overlay-pane,
+    #realSalesMap .leaflet-shadow-pane,
+    #realSalesMap .leaflet-marker-pane,
+    #realSalesMap .leaflet-tooltip-pane,
+    #realSalesMap .leaflet-popup-pane{
+      position:absolute!important;
+      left:0!important;
+      top:0!important;
+    }
+    #realSalesMap .leaflet-tile{
+      width:256px!important;
+      height:256px!important;
+      max-width:none!important;
+      max-height:none!important;
+      margin:0!important;
+      padding:0!important;
+      border:0!important;
+    }
+    .map-error{
+      display:none;padding:18px;text-align:center;color:var(--muted);
+      background:#f7f9fc;border:1px solid var(--border);border-radius:12px
+    }
+@media(max-width:760px){
+}
+
+
+    .map-empty-city{
+      padding:10px 12px;border-radius:10px;background:#fff8e8;
+      border:1px solid #f2d69b;color:#7a5b12;font-size:12px;margin-top:10px
+    }
+
+
+    .country-filter-note{
+      margin-top:8px;font-size:11px;color:var(--muted)
+    }
+    #citySelect:disabled{cursor:not-allowed;background:#f1f4f8}
+
+
+    .zone-selectors{display:contents}
+    @media(max-width:900px){
+      .zone-selectors{display:contents}
+    }
+
+
+    .commercial-source-note{
+      margin:10px 0 16px;padding:10px 12px;border-radius:10px;
+      background:#eef5ff;border:1px solid #cfe0ff;color:#36506f;font-size:12px
+    }
+
+
+    .pdv-map-pin{
+      width:24px;height:24px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:#17365d;color:#fff;border:3px solid #fff;
+      font-size:12px;font-weight:900;box-shadow:0 2px 8px rgba(0,0,0,.30)
+    }
+    .map-symbol-legend{
+      display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;
+      font-size:11px;color:var(--muted)
+    }
+    .map-symbol-legend span{display:flex;align-items:center;gap:6px}
+    .legend-dist{
+      width:16px;height:16px;border-radius:50%;
+      background:#2f80ed;border:3px solid #fff;
+      box-shadow:0 1px 5px rgba(0,0,0,.22)
+    }
+    .legend-pdv{
+      width:18px;height:18px;border-radius:50%;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:#17365d;color:#fff;border:2px solid #fff;
+      font-size:9px;font-weight:900;box-shadow:0 1px 5px rgba(0,0,0,.22)
+    }
+
+
+    .activity-criterion-card{
+      display:flex;justify-content:space-between;gap:14px;align-items:center;
+      background:#fff;border:1px solid var(--border);border-radius:14px;
+      padding:14px 16px;margin:14px 0;box-shadow:var(--shadow)
+    }
+    .activity-criterion-card strong{display:block;font-size:14px;color:var(--navy)}
+    .activity-criterion-card small{display:block;color:var(--muted);margin-top:4px;font-size:11px}
+    .activity-criterion-control{display:flex;align-items:center;gap:8px;white-space:nowrap}
+    .activity-criterion-control input{
+      width:78px;padding:9px 10px;border:1px solid var(--border);
+      border-radius:9px;font-weight:800;font-size:16px
+    }
+    .activity-criterion-control span{font-size:12px;color:var(--muted)}
+    .inactive-badge{
+      display:inline-block;padding:3px 7px;border-radius:999px;
+      background:#feeceb;color:#a92b22;font-size:10px;font-weight:800
+    }
+    .active-badge{
+      display:inline-block;padding:3px 7px;border-radius:999px;
+      background:#e8f7ec;color:#16863b;font-size:10px;font-weight:800
+    }
+    @media(max-width:650px){
+      .activity-criterion-card{align-items:flex-start;flex-direction:column}
+    }
+
+
+.seller-period-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.seller-period-select{padding:11px 13px;border:1px solid var(--border);border-radius:10px;background:white;color:var(--navy);font-weight:700}
+.seller-dashboard-v47{grid-template-columns:repeat(3,1fr)}
+.seller-ranking-card,.seller-detail-card-v47{margin-top:16px}
+.seller-card-head{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.muted-small{color:var(--muted);font-size:12px;margin-top:4px}
+.seller-row-v47{display:grid;grid-template-columns:36px minmax(120px,1fr) 90px 2fr 58px;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:9px}
+.channel-pill{display:inline-block;font-size:9px;font-weight:800;padding:3px 7px;border-radius:999px;background:#edf2f7;color:#596270;margin-top:4px}
+.seller-detail-v47{border:1px solid var(--border);border-radius:12px;padding:13px;margin-top:10px}
+.seller-detail-head-v47{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.seller-detail-metrics-v47{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.seller-detail-metric-v47{padding:9px;background:#f6f8fb;border-radius:9px}
+.seller-detail-metric-v47 small{display:block;color:var(--muted);font-size:9px;font-weight:800}
+.seller-detail-metric-v47 b{display:block;font-size:17px;margin-top:3px}
+@media(max-width:900px){.seller-dashboard-v47{grid-template-columns:1fr}.seller-row-v47{grid-template-columns:36px 1fr 74px 52px}.seller-row-v47 .seller-progress{grid-column:2/5}.seller-detail-metrics-v47{grid-template-columns:1fr 1fr}}
+
+
+.seller-dashboard-v50{grid-template-columns:repeat(4,1fr)}
+.seller-v50-card{margin-top:16px}
+.seller-v50-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.seller-v50-person{border:1px solid var(--border);border-radius:12px;padding:12px;background:#fff}
+.seller-v50-person-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.seller-v50-person strong{font-size:16px}
+.seller-v50-total{font-size:24px!important;color:var(--navy)}
+.seller-v50-products{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.seller-v50-chip{background:#eef2f6;color:#5f6874;border-radius:999px;padding:4px 7px;font-size:10px}
+.seller-table-scroll{overflow-x:auto;margin-top:12px}
+.seller-v50-table{width:100%;min-width:650px;border-collapse:collapse}
+.seller-v50-table th,.seller-v50-table td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:right;font-size:12px}
+.seller-v50-table th:first-child,.seller-v50-table td:first-child{text-align:left}
+.seller-v50-table th{color:var(--muted);font-size:10px}
+.seller-v50-detail{border:1px solid var(--border);border-radius:12px;margin-top:10px;overflow:hidden}
+.seller-v50-detail summary{list-style:none;cursor:pointer;padding:13px;display:flex;justify-content:space-between;gap:12px;align-items:center;font-weight:800}
+.seller-v50-detail summary::-webkit-details-marker{display:none}
+.seller-v50-detail-body{padding:0 13px 13px}
+.seller-v50-detail-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid #eef1f5;font-size:12px}
+.channel-traditional{background:#eff8d8;color:#527000}
+.channel-digital{background:#e7f8ec;color:#15833c}
+@media(max-width:900px){
+  .seller-dashboard-v50{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:650px){
+  .seller-v50-grid{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <div class="brand-icon">📍</div>
+      <div>
+        <h1>GeoVentas</h1>
+        <small>INTELIGENCIA COMERCIAL</small>
+      </div>
+    </div>
+
+    <nav>
+      <a class="nav-item active" href="#"><span class="nav-icon">⌂</span>Resumen por zona</a>
+      <a class="nav-item" href="#"><span class="nav-icon">🗺</span>Mapa de desarrollo</a>
+      <a class="nav-item" href="#"><span class="nav-icon">👥</span>Clientes</a>
+      <a class="nav-item" href="#"><span class="nav-icon">🚚</span>Distribuidores</a>
+      <a class="nav-item" href="#"><span class="nav-icon">▣</span>Productos / Familias</a>
+      <a class="nav-item" href="#"><span class="nav-icon">↗</span>Evolución</a>
+      <a class="nav-item" href="#"><span class="nav-icon">▤</span>Reportes</a>
+      <a class="nav-item" href="#"><span class="nav-icon">🔔</span>Alertas</a>
+      <a class="nav-item" href="#"><span class="nav-icon">⚙</span>Configuración</a>
+    </nav>
+
+    <div class="zone-card">
+      <small>ZONA ACTUAL</small>
+      <strong id="sideCity">PARANÁ</strong>
+      <span id="sideProvince">Entre Ríos</span>
+      <button onclick="document.getElementById('provinceSelect').focus()">⌖ Cambiar zona</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="title">
+        <h2>📍 <span id="mainCity">PARANÁ</span>, <span id="mainProvince">ENTRE RÍOS</span></h2>
+        <p>Resumen general de la zona</p>
+      </div>
+      <div class="top-actions">
+        <select id="period">
+          <option>Julio 2026</option>
+          <option>Junio 2026</option>
+          <option>Mayo 2026</option>
+        </select>
+        <span id="zoneSelectors" class="zone-selectors">
+          <select id="provinceSelect" aria-label="Provincia">
+            <option value="ALL" data-name="Todo el país">Todo el país</option>
+            <option value="">Cargando provincias...</option>
+          </select>
+          <select id="citySelect" aria-label="Localidad">
+            <option value="">Todas las localidades</option>
+          </select>
+        </span>
+      </div>
+    </div>
+    <div id="locationStatus" style="margin:-8px 0 14px;color:var(--muted);font-size:12px">
+      Las localidades se cargan desde GeoRef según la provincia seleccionada.
+    </div>
+
+
+
+    <div class="view-tabs">
+      <button id="tabGeo" class="view-tab active" onclick="switchView('geo')">🗺 GeoVentas</button>
+      <button id="tabCommercial" class="view-tab" onclick="switchView('commercial')">📊 Control Comercial</button>
+      <button id="tabSellers" class="view-tab" onclick="switchView('sellers')">👥 Control de vendedores</button>
+    </div>
+
+    <div id="geoView" class="app-view">
+
+      <div class="activity-criterion-card">
+        <div>
+          <strong>⚙️ Criterio de cliente activo</strong>
+          <small>Un cliente se considera inactivo si supera este período sin compras.</small>
+        </div>
+        <div class="activity-criterion-control">
+          <input id="activeDaysInput" type="number" min="1" max="365" value="60">
+          <span>días sin compra</span>
+        </div>
+      </div>
+
+<section class="import-panel">
+      <div>
+        <div class="import-title">📥 Cargar datos reales de ventas</div>
+        <div class="import-help">
+          Podés importar un archivo exportado desde Chess o cargar un Excel/CSV. Columnas esperadas:
+          Fecha, Cliente, Tipo de cliente, Provincia, Localidad, Producto y Facturación neta.
+          Dirección es recomendable. Latitud y Longitud son opcionales.
+        </div>
+        <div id="dataStatus" class="data-status"></div>
+      </div>
+      <div class="import-actions">
+        <input id="chessFile" class="file-input" type="file" accept=".xlsx,.xls,.csv" />
+        <input id="salesFile" class="file-input" type="file" accept=".xlsx,.xls,.csv" />
+        <button class="primary-btn" onclick="document.getElementById('chessFile').click()">♟ Importar desde Chess</button>
+        <button class="secondary-btn" onclick="document.getElementById('salesFile').click()">📂 Cargar Excel / CSV</button>
+        <button class="secondary-btn" onclick="downloadTemplate()">⬇ Descargar modelo</button>
+        <button class="secondary-btn" onclick="clearImportedData()">↺ Volver a demo</button>
+      </div>
+    </section>
+
+    <section class="kpis">
+      <div class="kpi">
+        <label>ÍNDICE DE DESARROLLO<br>DE ZONA (IDZ)</label>
+        <strong class="positive" id="idzValue">78<span style="font-size:18px">/100</span></strong>
+        <small class="positive"><b>MUY BUENO</b></small>
+      </div>
+      
+      <div class="kpi clickable" id="distributorKpi" onclick="toggleKpiDetail('distributorKpi')">
+        <label>DISTRIBUIDORES DIRECTOS</label>
+        <strong id="clientsValue">2</strong>
+        <small class="positive">Distribuidores activos</small>
+        <div class="kpi-hint">Tocar para ver detalle ▾</div>
+        <div id="distributorInlineDetail" class="kpi-inline-detail" onclick="event.stopPropagation()">
+          
+<div class="kpi-detail-row">
+  <div>
+    <b>Centro Distribuidora</b><br>
+    <span><b>Dirección:</b> Av. Circunvalación 2450, Paraná</span><br>
+    <span><b>Zona de alcance:</b> Paraná, Crespo y Nogoyá</span><br>
+    <span><b>Productos:</b> Golden Saft, Agua, Concentrados y Dulces</span>
+  </div>
+  <div style="text-align:right">
+    <b>$10.750.000</b><br><span style="color:var(--green)">+12%</span>
+  </div>
+</div>
+          
+<div class="kpi-detail-row">
+  <div>
+    <b>Campi Distribuidor</b><br>
+    <span><b>Dirección:</b> Av. Almafuerte 1840, Paraná</span><br>
+    <span><b>Zona de alcance:</b> Paraná capital y alrededores</span><br>
+    <span><b>Producto:</b> Golden Saft</span>
+  </div>
+  <div style="text-align:right">
+    <b>$6.970.000</b><br><span style="color:var(--orange)">+4%</span>
+  </div>
+</div>
+          <div class="kpi-detail-row"><span>Participación en la facturación</span><b id="inlineDistShare">66%</b></div>
+        </div>
+      </div>
+      
+      <div class="kpi clickable" id="pdvKpi" onclick="toggleKpiDetail('pdvKpi')">
+        <label>PUNTOS DE VENTA DIRECTOS</label>
+        <strong id="distributorsValue">18</strong>
+        <small class="blue">Atendidos por preventa de fábrica</small>
+        <div class="kpi-hint">Tocar para ver detalle ▾</div>
+        <div id="pdvInlineDetail" class="kpi-inline-detail" onclick="event.stopPropagation()">
+          <div class="kpi-detail-row"><div><b>Supermercado Norte</b><br><span>Av. Don Bosco 1120, Paraná</span><br><span>Productos: Golden Saft, Agua y Gaseosas</span></div><div style="text-align:right"><b>$1.800.000</b><br><span style="color:var(--green)">+8%</span></div></div>
+          <div class="kpi-detail-row"><div><b>Autoservicio Central</b><br><span>Alameda de la Federación 428, Paraná</span><br><span>Producto: Agua</span></div><div style="text-align:right"><b>$720.000</b><br><span style="color:var(--green)">+15%</span></div></div>
+          <div class="kpi-detail-row"><div><b>Mayorista Paraná</b><br><span>Av. de las Américas 2650, Paraná</span><br><span>Productos: Golden Saft, Dulces, Vinto y Fernet F-3</span></div><div style="text-align:right"><b>$2.300.000</b><br><span style="color:var(--green)">+4%</span></div></div>
+          <div class="kpi-detail-row"><div><b>Despensa El Puente</b><br><span>Av. Ramírez 1895, Paraná</span><br><span>Producto: Golden Saft</span></div><div style="text-align:right"><b>$460.000</b><br><span style="color:var(--red)">-2%</span></div></div>
+          <div class="kpi-detail-row"><span>Otros puntos de venta</span><b id="inlinePdvOthers">14</b></div>
+          <div class="kpi-detail-row"><span>Participación en la facturación</span><b id="inlinePdvShare">34%</b></div>
+        </div>
+      </div>
+      <div class="kpi">
+        <label>COBERTURA DE PDV</label>
+        <strong id="coverageValue">65<span style="font-size:18px">%</span></strong>
+        <small class="warning">Del total de PDV potenciales</small>
+      </div>
+      <div class="kpi">
+        <label>ÚLTIMO CRECIMIENTO</label>
+        <strong class="positive" id="growthValue">+12<span style="font-size:18px">%</span></strong>
+        <small class="positive">Vs. mes anterior</small>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <div class="left-col">
+        <div class="card">
+          <h3>DESARROLLO POR FAMILIA DE PRODUCTOS</h3>
+          <div class="product-development">
+            <div class="donut-wrap">
+              <div class="donut">
+                <div class="donut-center">
+                  <small>IDZ GENERAL</small>
+                  <strong>78<span style="font-size:20px">/100</span></strong>
+                  <span>MUY BUENO</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="product-list">
+              <div class="product-row"><span class="dot" style="background:var(--green)"></span><span class="product-name">GASEOSAS</span><b>92%</b><span class="state green">LÍDER</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:var(--green2)"></span><span class="product-name">CONCENTRADOS</span><b>88%</b><span class="state green">MUY ALTO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:var(--teal)"></span><span class="product-name">AGUA</span><b>81%</b><span class="state teal">ALTO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:#1889c7"></span><span class="product-name">DULCES</span><b>76%</b><span class="state teal">ALTO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:var(--yellow)"></span><span class="product-name">CERVEZA GOLDEN SAFT</span><b>54%</b><span class="state yellow">MEDIO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:var(--orange)"></span><span class="product-name">AMARGOS</span><b>49%</b><span class="state orange">EN CRECIMIENTO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:#ff5b00"></span><span class="product-name">FIDEOS MANYABENE</span><b>18%</b><span class="state red">BAJO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:var(--red)"></span><span class="product-name">VINTO</span><b>12%</b><span class="state red">MUY BAJO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:var(--gray)"></span><span class="product-name">AQUALOE</span><b>3%</b><span class="state gray">SIN DESARROLLO</span><button class="eye">◉</button></div>
+              <div class="product-row"><span class="dot" style="background:#c3cad4"></span><span class="product-name">FERNET F-3</span><b>0%</b><span class="state gray">SIN DESARROLLO</span><button class="eye">◉</button></div>
+            </div>
+          </div>
+
+          <div class="legend">
+            <div><span class="dot" style="background:var(--green)"></span>LÍDER · 80% o más</div>
+            <div><span class="dot" style="background:var(--teal)"></span>ALTO · 60% a 79%</div>
+            <div><span class="dot" style="background:var(--yellow)"></span>MEDIO · 40% a 59%</div>
+            <div><span class="dot" style="background:var(--orange)"></span>EN CRECIMIENTO · 20% a 39%</div>
+            <div><span class="dot" style="background:var(--red)"></span>BAJO · menos de 20%</div>
+            <div><span class="dot" style="background:var(--gray)"></span>SIN DESARROLLO</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>EVOLUCIÓN DEL IDZ</h3>
+          <div class="chart">
+            <div class="gridline g1"></div><div class="gridline g2"></div><div class="gridline g3"></div><div class="gridline g4"></div>
+            <span class="axis-label a1">100</span><span class="axis-label a2">75</span><span class="axis-label a3">50</span><span class="axis-label a4">25</span>
+            <svg viewBox="0 0 700 170" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="fill" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#48b15a" stop-opacity=".32"/>
+                  <stop offset="100%" stop-color="#48b15a" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M40,118 L225,103 L410,86 L600,68 L600,160 L40,160 Z" fill="url(#fill)"/>
+              <polyline points="40,118 225,103 410,86 600,68" fill="none" stroke="#21933a" stroke-width="4"/>
+              <circle cx="40" cy="118" r="6" fill="#21933a"/><circle cx="225" cy="103" r="6" fill="#21933a"/>
+              <circle cx="410" cy="86" r="6" fill="#21933a"/><circle cx="600" cy="68" r="6" fill="#21933a"/>
+              <text x="40" y="101" text-anchor="middle" font-size="16" fill="#10203d">68</text>
+              <text x="225" y="86" text-anchor="middle" font-size="16" fill="#10203d">71</text>
+              <text x="410" y="69" text-anchor="middle" font-size="16" fill="#10203d">74</text>
+              <text x="600" y="51" text-anchor="middle" font-size="16" fill="#10203d">78</text>
+            </svg>
+          </div>
+          <div class="chart-labels"><span>Abril 2026</span><span>Mayo 2026</span><span>Junio 2026</span><span>Julio 2026</span></div>
+        </div>
+
+        <div class="card">
+          <div class="map-toolbar">
+            <div>
+              <h3 style="margin-bottom:4px">🗺 MAPA DE DESARROLLO</h3>
+              <div style="font-size:12px;color:var(--muted)">Ubicación real de distribuidores</div>
+            </div>
+            
+          </div>
+          
+          
+          
+
+          
+          <div class="map-panel-header">
+            <div>
+              <small>MAPA COMERCIAL REAL</small>
+              <strong id="realMapTitle">Paraná, Entre Ríos</strong>
+              <span id="realMapScope" style="color:var(--blue);font-size:12px;font-weight:800">
+                Distribuidores y zonas de alcance
+              </span>
+              <div class="map-symbol-legend">
+                <span><i class="legend-dist"></i>Distribuidor</span>
+                <span><i class="legend-pdv">P</i>PDV directo</span>
+              </div>
+            </div>
+          </div>
+          <div id="realSalesMap"></div><div id="mapError" class="map-error">No se pudo iniciar el mapa. Volvé a abrir esta versión desde una página web publicada.</div>
+          <div id="realMapStatus" class="map-status">Las direcciones se ubican automáticamente en el mapa.
+            El mapa se centra en la localidad seleccionada y ubica cada distribuidor según su dirección.
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="right-col">
+        <div class="card" id="commercialCompositionCard" style="display:none">
+          <h3>🏢 COMPOSICIÓN COMERCIAL DE LA ZONA</h3>
+
+          <div style="background:#f7f9fc;border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+            <div style="color:var(--muted);font-size:12px;font-weight:700">FACTURACIÓN TOTAL DE LA ZONA</div>
+            <div id="totalBilling" style="font-size:28px;font-weight:800;margin-top:6px">$26.670.000</div>
+            <div style="color:var(--muted);font-size:12px;margin-top:4px">Distribuidores directos + puntos de venta directos</div>
+          </div>
+
+          <div onclick="toggleClient('distribuidores')" style="border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+              <div>
+                <strong>🚚 Distribuidores directos</strong>
+                <div id="distSummary" style="color:var(--muted);font-size:12px;margin-top:4px">2 clientes · $17.720.000</div>
+              </div>
+              <div style="text-align:right">
+                <strong id="distShare" style="color:var(--green)">66%</strong>
+                <div style="color:var(--muted);font-size:11px">de la facturación</div>
+              </div>
+            </div>
+
+            <div id="distribuidoresDetail" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:12px"><div id="distList">
+              <div onclick="event.stopPropagation();toggleClient('centro')" style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;cursor:pointer;background:#fff">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+                  <div>
+                    <strong>Centro Distribuidora</strong>
+                    <div style="color:var(--muted);font-size:12px;margin-top:4px">Paraná · Crespo · Nogoyá</div>
+                  </div>
+                  <div style="text-align:right">
+                    <strong>$10.750.000</strong>
+                    <div style="color:var(--green);font-size:12px">+12%</div>
+                  </div>
+                </div>
+                <div id="centroDetail" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+                  <table>
+                    <thead><tr><th>MES</th><th>FACTURACIÓN</th><th>CRECIMIENTO</th></tr></thead>
+                    <tbody>
+                      <tr><td>Abril 2026</td><td>$8.400.000</td><td>—</td></tr>
+                      <tr><td>Mayo 2026</td><td>$8.950.000</td><td>+6,5%</td></tr>
+                      <tr><td>Junio 2026</td><td>$9.600.000</td><td>+7,3%</td></tr>
+                      <tr><td>Julio 2026</td><td>$10.750.000</td><td><strong style="color:var(--green)">+12%</strong></td></tr>
+                    </tbody>
+                  </table>
+                  <div style="margin-top:10px;color:var(--muted);font-size:12px">Productos: Gaseosas, Agua y Concentrados.</div>
+                </div>
+              </div>
+
+              <div onclick="event.stopPropagation();toggleClient('campi')" style="border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;background:#fff">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+                  <div>
+                    <strong>Campi Distribuidor</strong>
+                    <div style="color:var(--muted);font-size:12px;margin-top:4px">Paraná</div>
+                  </div>
+                  <div style="text-align:right">
+                    <strong>$6.970.000</strong>
+                    <div style="color:var(--orange);font-size:12px">+4%</div>
+                  </div>
+                </div>
+                <div id="campiDetail" style="display:none;margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+                  <table>
+                    <thead><tr><th>MES</th><th>FACTURACIÓN</th><th>CRECIMIENTO</th></tr></thead>
+                    <tbody>
+                      <tr><td>Abril 2026</td><td>$6.100.000</td><td>—</td></tr>
+                      <tr><td>Mayo 2026</td><td>$6.420.000</td><td>+5,2%</td></tr>
+                      <tr><td>Junio 2026</td><td>$6.700.000</td><td>+4,4%</td></tr>
+                      <tr><td>Julio 2026</td><td>$6.970.000</td><td><strong style="color:var(--orange)">+4%</strong></td></tr>
+                    </tbody>
+                  </table>
+                  <div style="margin-top:10px;color:var(--muted);font-size:12px">Productos: Gaseosas y Cerveza Golden Saft.</div>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="toggleClient('pdv')" style="border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+              <div>
+                <strong>🏪 Puntos de venta directos</strong>
+                <div id="pdvSummary" style="color:var(--muted);font-size:12px;margin-top:4px">18 clientes · $8.950.000</div>
+              </div>
+              <div style="text-align:right">
+                <strong id="pdvShare" style="color:var(--blue)">34%</strong>
+                <div style="color:var(--muted);font-size:11px">de la facturación</div>
+              </div>
+            </div>
+
+            <div id="pdvDetail" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+              <table>
+                <thead><tr><th>CLIENTE</th><th>FACTURACIÓN</th><th>CRECIMIENTO</th></tr></thead>
+                <tbody id="pdvTableBody">
+                  <tr><td>Supermercado Norte</td><td>$1.800.000</td><td><span style="color:var(--green)">+8%</span></td></tr>
+                  <tr><td>Autoservicio Central</td><td>$720.000</td><td><span style="color:var(--green)">+15%</span></td></tr>
+                  <tr><td>Mayorista Paraná</td><td>$2.300.000</td><td><span style="color:var(--green)">+4%</span></td></tr>
+                  <tr><td>Supermercado Sur</td><td>$1.250.000</td><td><span style="color:var(--red)">-2%</span></td></tr>
+                  <tr><td>Otros 14 clientes</td><td>$2.880.000</td><td>+6%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    </div>
+
+    <div id="commercialView" class="app-view hidden">
+      <div class="week-bar">
+        <div>
+          <h2 id="commercialTitle" style="margin:0 0 4px">Control Comercial Semanal</h2>
+          <div style="color:var(--muted);font-size:13px">Seguimiento de venta tradicional, digital, productos y equipo comercial</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <select id="commercialWeek">
+            <option value="weekly">Informe semanal</option>
+            <option value="monthly">Informe mensual</option>
+          </select>
+          <button class="primary-btn" onclick="document.getElementById('weeklyFile').click()">📥 Cargar seguimiento</button>
+          <input id="weeklyFile" class="file-input" type="file" accept=".xlsx,.xls,.csv" />
+        </div>
+      </div>
+
+      <section class="commercial-kpis">
+        <div class="kpi"><label>BULTOS TOTALES</label><strong class="blue">1.166</strong><small>tradicional + digital</small></div>
+        <div class="kpi"><label>BULTOS VENTA TRADICIONAL</label><strong>998</strong><small>85,6% del total</small></div>
+        <div class="kpi"><label>BULTOS VENTA DIGITAL</label><strong class="positive">168</strong><small>14,4% del total</small></div>
+        <div class="kpi"><label>PALLETS TOTALES</label><strong>7,32</strong><small>equivalentes del período</small></div>
+        <div class="kpi"><label>PRODUCTO LÍDER</label><strong style="font-size:24px">Cerveza 6 × 1000</strong><small>869 bultos</small></div>
+      </section>
+
+      <div class="commercial-source-note">
+        Datos demostrativos tomados del resumen cargado: 998 bultos tradicionales, 168 digitales,
+        1.166 bultos totales y 7,32 pallets equivalentes.
+      </div>
+
+      <section class="commercial-grid">
+        <div class="commercial-left">
+          <div class="card">
+            <h3>📦 BULTOS TOTALES POR PRODUCTO</h3>
+            <div class="mini-bars">
+              <div class="mini-bar-row"><span>Cerveza 6 × 1000</span><div class="mini-track"><div class="mini-fill" style="width:100%"></div></div><strong>869</strong></div>
+              <div class="mini-bar-row"><span>Dulce de 1 kg</span><div class="mini-track"><div class="mini-fill" style="width:10.5%"></div></div><strong>91</strong></div>
+              <div class="mini-bar-row"><span>Fernet F-3</span><div class="mini-track"><div class="mini-fill" style="width:10.1%"></div></div><strong>88</strong></div>
+              <div class="mini-bar-row"><span>Agua saborizada 2 × 5</span><div class="mini-track"><div class="mini-fill" style="width:9.4%"></div></div><strong>82</strong></div>
+              <div class="mini-bar-row"><span>Vinto 6 × 1000</span><div class="mini-track"><div class="mini-fill" style="width:3.6%"></div></div><strong>31</strong></div>
+              <div class="mini-bar-row"><span>Cerveza 6 × 473</span><div class="mini-track"><div class="mini-fill" style="width:.6%"></div></div><strong>5</strong></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>📋 DETALLE POR CANAL</h3>
+            <table>
+              <thead><tr><th>PRODUCTO</th><th>BULTOS TRAD.</th><th>BULTOS DIG.</th><th>BULTOS TOTAL</th><th>PALLETS</th></tr></thead>
+              <tbody>
+                <tr><td>Cerveza 6 × 1000</td><td>701</td><td>168</td><td><strong>869</strong></td><td>5,17</td></tr>
+                <tr><td>Cerveza 6 × 473</td><td>5</td><td>0</td><td><strong>5</strong></td><td>0,02</td></tr>
+                <tr><td>Agua saborizada 2 × 5</td><td>82</td><td>0</td><td><strong>82</strong></td><td>0,98</td></tr>
+                <tr><td>Vinto 6 × 1000</td><td>31</td><td>0</td><td><strong>31</strong></td><td>0,18</td></tr>
+                <tr><td>Fernet F-3</td><td>88</td><td>0</td><td><strong>88</strong></td><td>0,50</td></tr>
+                <tr><td>Dulce de 1 kg</td><td>91</td><td>0</td><td><strong>91</strong></td><td>0,47</td></tr>
+              </tbody>
+              <tfoot><tr><th>TOTAL</th><th>998</th><th>168</th><th>1.166</th><th>7,32</th></tr></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div class="commercial-right">
+          <div class="card">
+            <h3>🔄 PARTICIPACIÓN POR CANAL</h3>
+            <div class="channel-bar">
+              <div class="channel-traditional" style="width:85.6%"></div>
+              <div class="channel-digital" style="width:14.4%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px">
+              <span><i class="map-dot" style="background:var(--blue)"></i> Tradicional: <strong>85,6%</strong></span>
+              <span><i class="map-dot" style="background:var(--green)"></i> Digital: <strong>14,4%</strong></span>
+            </div>
+            <p class="commercial-note" style="margin-top:14px">
+              En este seguimiento, la venta digital se concentra únicamente en Cerveza 6 × 1000.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>👥 EQUIPO TRADICIONAL</h3>
+            <div class="seller-grid">
+              <div class="seller-card"><small>Olmos</small><strong>252</strong></div>
+              <div class="seller-card"><small>Castañe</small><strong>184</strong></div>
+              <div class="seller-card"><small>Carrizo</small><strong>65</strong></div>
+              <div class="seller-card"><small>Camnas</small><strong>115</strong></div>
+              <div class="seller-card"><small>Nasta</small><strong>114</strong></div>
+              <div class="seller-card"><small>Arnica</small><strong>103</strong></div>
+            </div>
+            <p class="commercial-note" style="margin:12px 0 0">
+              Ranking preliminar armado con la lectura del seguimiento recibido. Al cargar el Excel original se calcularán todos los vendedores automáticamente.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>💡 LECTURA RÁPIDA</h3>
+            <div class="actions-list">
+              <div class="action-item"><span class="check">✓</span><span>Cerveza 1 L representa aproximadamente el 75% de la venta total registrada.</span></div>
+              <div class="action-item"><span class="check">✓</span><span>El canal digital tiene margen para desarrollar las demás familias.</span></div>
+              <div class="action-item"><span class="check">✓</span><span>Agua, Fernet y Dulces muestran volumen similar y pueden compararse semana contra semana.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+
+
+<div id="sellersView" class="app-view hidden">
+  <div class="week-bar">
+    <div>
+      <h2 id="sellerControlTitle" style="margin:0 0 4px">Control de vendedores semanal</h2>
+      <div style="color:var(--muted);font-size:13px">Seguimiento por canal, vendedor y producto</div>
+    </div>
+    <div class="seller-period-actions">
+      <select id="sellerPeriodSelect" class="seller-period-select">
+        <option value="weekly">Control semanal</option>
+        <option value="monthly">Control mensual</option>
+      </select>
+      <button class="primary-btn" onclick="document.getElementById('weeklyFile').click()">📥 Cargar seguimiento</button>
+    </div>
+  </div>
+
+  <section class="seller-dashboard seller-dashboard-v50">
+    <div class="kpi">
+      <label>BULTOS TOTALES</label>
+      <strong class="blue">1.166</strong>
+      <small>tradicional + digital</small>
+    </div>
+    <div class="kpi">
+      <label>VENTA TRADICIONAL</label>
+      <strong>998</strong>
+      <small>85,6% del total</small>
+    </div>
+    <div class="kpi">
+      <label>VENTA DIGITAL</label>
+      <strong class="positive">168</strong>
+      <small>14,4% del total</small>
+    </div>
+    <div class="kpi">
+      <label>PALLETS TOTALES</label>
+      <strong>7,32</strong>
+      <small>equivalentes</small>
+    </div>
+  </section>
+
+  <section class="card seller-v50-card">
+    <h3>👥 VENTA TRADICIONAL POR VENDEDOR</h3>
+    <div class="muted-small">Bultos vendidos en el seguimiento actual</div>
+    <div id="traditionalSellerCards" class="seller-v50-grid"></div>
+  </section>
+
+  <section class="card seller-v50-card">
+    <h3>💻 VENTA DIGITAL</h3>
+    <div class="muted-small">Seguimiento del equipo digital</div>
+    <div id="digitalSellerCards" class="seller-v50-grid"></div>
+  </section>
+
+  <section class="card seller-v50-card">
+    <h3>📦 DETALLE POR PRODUCTO</h3>
+    <div class="muted-small">Tradicional, digital, total, participación y pallets</div>
+    <div class="seller-table-scroll">
+      <table class="seller-v50-table">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Trad.</th>
+            <th>Digital</th>
+            <th>Total</th>
+            <th>% Trad.</th>
+            <th>% Digital</th>
+            <th>Pallets</th>
+          </tr>
+        </thead>
+        <tbody id="sellerProductSummary"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card seller-v50-card">
+    <h3>🔎 DETALLE POR VENDEDOR Y PRODUCTO</h3>
+    <div class="muted-small">La misma lectura de la planilla, ordenada para celular</div>
+    <div id="sellerProductDetail"></div>
+  </section>
+</div>
+<div class="footer-note">V5.0 · Gestión comercial por país, provincia y localidad · GeoVentas V5.0</div>
+  </main>
+</div>
+
+<script>
+const provinceSelect = document.getElementById("provinceSelect");
+const citySelect = document.getElementById("citySelect");
+const locationStatus = document.getElementById("locationStatus");
+
+const fallbackProvinces = [
+  "Buenos Aires","Ciudad Autónoma de Buenos Aires","Catamarca","Chaco","Chubut",
+  "Córdoba","Corrientes","Entre Ríos","Formosa","Jujuy","La Pampa","La Rioja",
+  "Mendoza","Misiones","Neuquén","Río Negro","Salta","San Juan","San Luis",
+  "Santa Cruz","Santa Fe","Santiago del Estero","Tierra del Fuego, Antártida e Islas del Atlántico Sur","Tucumán"
+];
+
+const fallbackCities = {
+  "Entre Ríos":["Paraná","Concordia","Gualeguaychú","Concepción del Uruguay","Colón","Crespo","Victoria","Nogoyá","Villaguay","La Paz","General Ramírez"],
+  "Santa Fe":["Rosario","Santa Fe","Rafaela","Reconquista","Venado Tuerto","Villa Gobernador Gálvez","Santo Tomé","Esperanza"],
+  "Córdoba":["Córdoba","Río Cuarto","Villa María","San Francisco","Villa Carlos Paz","Jesús María","Río Tercero"],
+  "Buenos Aires":["La Plata","Mar del Plata","Bahía Blanca","Tandil","Junín","Pergamino","San Nicolás de los Arroyos","Zárate","Campana"],
+  "Ciudad Autónoma de Buenos Aires":["Ciudad Autónoma de Buenos Aires"]
+};
+
+function normalizeProvinceName(name){
+  if(name === "Ciudad Autónoma de Buenos Aires") return "Ciudad Autónoma de Buenos Aires";
+  return name;
+}
+
+function setHeader(city, province){
+  const safeCity = city || "Seleccione localidad";
+  const safeProvince = province || "Seleccione provincia";
+  document.getElementById("mainCity").textContent = safeCity.toUpperCase();
+  document.getElementById("mainProvince").textContent = safeProvince.toUpperCase();
+  document.getElementById("sideCity").textContent = safeCity.toUpperCase();
+  document.getElementById("sideProvince").textContent = safeProvince;
+}
+
+function setDemoMetrics(city, province){
+  const key = (city + province).length;
+  const idz = 58 + (key % 29);
+  const clients = city ? 2 : 0;
+  const distributors = city ? 18 : 0;
+  const coverage = 42 + (key % 39);
+  const growth = 2 + (key % 17);
+
+  document.getElementById("idzValue").innerHTML = idz + '<span style="font-size:18px">/100</span>';
+  document.getElementById("clientsValue").textContent = clients;
+  document.getElementById("distributorsValue").textContent = distributors;
+  document.getElementById("coverageValue").innerHTML = coverage + '<span style="font-size:18px">%</span>';
+  document.getElementById("growthValue").innerHTML = "+" + growth + '<span style="font-size:18px">%</span>';
+}
+
+async function loadProvinces(){
+  provinceSelect.innerHTML = '<option value="ALL" data-name="Todo el país">Todo el país</option><option value="">Seleccione una provincia</option>';
+  try{
+    const res = await fetch("https://apis.datos.gob.ar/georef/api/provincias?max=100");
+    if(!res.ok) throw new Error("No se pudo consultar GeoRef");
+    const data = await res.json();
+    const provinces = (data.provincias || data.resultados || [])
+      .map(p => ({id:p.id, nombre:p.nombre}))
+      .sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
+
+    provinces.forEach(p=>{
+      const option = document.createElement("option");
+      option.value = p.id;
+      option.dataset.name = p.nombre;
+      option.textContent = p.nombre;
+      provinceSelect.appendChild(option);
+    });
+    locationStatus.textContent = "Provincias cargadas desde GeoRef.";
+  }catch(error){
+    locationStatus.textContent = "Sin conexión con GeoRef: se muestra una lista básica de respaldo.";
+    fallbackProvinces.forEach((name,index)=>{
+      const option = document.createElement("option");
+      option.value = "fallback-" + index;
+      option.dataset.name = name;
+      option.textContent = name;
+      provinceSelect.appendChild(option);
+    });
+  }
+
+  // Start in Entre Ríos.
+  const entreRiosOption = [...provinceSelect.options].find(o => o.dataset.name === "Entre Ríos");
+  if(entreRiosOption){
+    provinceSelect.value = entreRiosOption.value;
+    await loadCities();
+  }
+}
+
+async function loadCities(){
+  if(typeof importedRows !== "undefined" && importedRows.length){ rebuildCitySelector(); return; }
+  const option = provinceSelect.selectedOptions[0];
+  const provinceName = option?.dataset.name || "";
+  const provinceId = provinceSelect.value;
+
+  if(provinceId === "ALL"){
+    citySelect.innerHTML = '<option value="">Todas las localidades</option>';
+    citySelect.disabled = true;
+    locationStatus.textContent = "Vista nacional: todas las provincias y localidades.";
+    setHeader("Todo el país", "");
+    setDemoMetrics("", "Todo el país");
+    return;
+  }
+
+  citySelect.innerHTML = '<option value="">Cargando localidades...</option>';
+  citySelect.disabled = true;
+
+  try{
+    if(!provinceId || provinceId.startsWith("fallback-")) throw new Error("Usar respaldo");
+    const url = "https://apis.datos.gob.ar/georef/api/localidades?provincia=" +
+      encodeURIComponent(provinceId) + "&max=5000";
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("No se pudieron consultar localidades");
+    const data = await res.json();
+    const cities = (data.localidades || data.resultados || [])
+      .map(c => c.nombre)
+      .filter(Boolean)
+      .sort((a,b)=>a.localeCompare(b,"es"));
+
+    citySelect.innerHTML = '<option value="">Seleccione una localidad</option>';
+    [...new Set(cities)].forEach(name=>{
+      const cityOption = document.createElement("option");
+      cityOption.value = name;
+      cityOption.textContent = name;
+      citySelect.appendChild(cityOption);
+    });
+    locationStatus.textContent = cities.length + " localidades cargadas para " + provinceName + ".";
+  }catch(error){
+    const cities = fallbackCities[provinceName] || [provinceName];
+    locationStatus.textContent = "No se pudo conectar con GeoRef. Se muestran localidades básicas de respaldo.";
+    citySelect.innerHTML = '<option value="">Seleccione una localidad</option>';
+    cities.forEach(name=>{
+      const cityOption = document.createElement("option");
+      cityOption.value = name;
+      cityOption.textContent = name;
+      citySelect.appendChild(cityOption);
+    });
+  }finally{
+    citySelect.disabled = false;
+  }
+
+  const preferred = provinceName === "Entre Ríos" ? "Paraná" : "";
+  const preferredOption = [...citySelect.options].find(o => o.value === preferred);
+  if(preferredOption){
+    citySelect.value = preferred;
+    setHeader(preferred, provinceName);
+    setDemoMetrics(preferred, provinceName);
+  }else{
+    setHeader("", provinceName);
+  }
+}
+
+provinceSelect.addEventListener("change", loadCities);
+
+citySelect.addEventListener("change", function(){
+  const provinceName = provinceSelect.selectedOptions[0]?.dataset.name || "";
+  const cityName = this.value;
+  if(cityName){
+    setHeader(cityName, provinceName);
+    setDemoMetrics(cityName, provinceName);
+  }
+});
+
+function toggleClient(id){
+  const detail = document.getElementById(id + "Detail");
+  if(!detail) return;
+  detail.style.display = detail.style.display === "none" ? "block" : "none";
+}
+
+loadProvinces();
+
+let importedRows = [];
+let salesMap = null;
+let mapLayer = null;
+const georefCache = new Map();
+
+const productAliases = {
+  "gaseosa":"Gaseosas","gaseosas":"Gaseosas",
+  "concentrado":"Concentrados","concentrados":"Concentrados",
+  "agua":"Agua","aguas":"Agua",
+  "dulce":"Dulces","dulces":"Dulces",
+  "cerveza":"Cerveza Golden Saft","cerveza golden saft":"Cerveza Golden Saft",
+  "vinto":"Vinto","amargo":"Amargos","amargos":"Amargos",
+  "fernet":"Fernet F-3","fernet f-3":"Fernet F-3",
+  "aqualoe":"Aqualoe","fideos":"Fideos Manyabene","fideos manyabene":"Fideos Manyabene"
+};
+
+function cleanKey(value){
+  return String(value ?? "").trim().toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/\s+/g," ");
+}
+
+function getValue(row, aliases){
+  const keys = Object.keys(row);
+  for(const alias of aliases){
+    const found = keys.find(k => cleanKey(k) === cleanKey(alias));
+    if(found !== undefined) return row[found];
+  }
+  return "";
+}
+
+function parseMoney(value){
+  if(typeof value === "number") return Number.isFinite(value) ? value : 0;
+  let s = String(value ?? "").trim();
+  if(!s) return 0;
+  s = s.replace(/\$/g,"").replace(/\s/g,"");
+  if(s.includes(",") && s.includes(".")){
+    if(s.lastIndexOf(",") > s.lastIndexOf(".")) s = s.replace(/\./g,"").replace(",",".");
+    else s = s.replace(/,/g,"");
+  }else if(s.includes(",")){
+    const parts = s.split(",");
+    s = parts[parts.length-1].length <= 2 ? s.replace(/\./g,"").replace(",",".") : s.replace(/,/g,"");
+  }else{
+    s = s.replace(/(?<=\d)\.(?=\d{3}(\D|$))/g,"");
+  }
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function parseDateValue(value){
+  if(value instanceof Date && !isNaN(value)) return value;
+  if(typeof value === "number" && window.XLSX){
+    const p = XLSX.SSF.parse_date_code(value);
+    if(p) return new Date(p.y, p.m-1, p.d);
+  }
+  const s = String(value ?? "").trim();
+  if(!s) return null;
+  const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(dmy){
+    let year = Number(dmy[3]); if(year < 100) year += 2000;
+    return new Date(year, Number(dmy[2])-1, Number(dmy[1]));
+  }
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
+function normalizeType(value){
+  const t = cleanKey(value);
+  if(t.includes("distrib")) return "Distribuidor";
+  return "Punto de venta directo";
+}
+
+function normalizeProduct(value){
+  const key = cleanKey(value);
+  return productAliases[key] || String(value || "Sin especificar").trim();
+}
+
+function normalizeRows(rawRows){
+  return rawRows.map((row,index)=>{
+    const date = parseDateValue(getValue(row,["Fecha","Fecha comprobante","Fecha de venta"]));
+    const client = String(getValue(row,["Cliente","Razón social","Razon social","Nombre cliente"]) || "").trim();
+    const province = String(getValue(row,["Provincia"]) || "").trim();
+    const city = String(getValue(row,["Localidad","Ciudad"]) || "").trim();
+    const product = normalizeProduct(getValue(row,["Producto","Familia","Familia de producto","Rubro"]));
+    const billing = parseMoney(getValue(row,["Facturación neta","Facturacion neta","Neto","Importe neto","Total neto","Facturación","Facturacion"]));
+    const type = normalizeType(getValue(row,["Tipo de cliente","Tipo cliente","Canal","Clasificación","Clasificacion"]));
+    const lat = Number(String(getValue(row,["Latitud","Latitude","Lat"])).replace(",","."));
+    const lon = Number(String(getValue(row,["Longitud","Longitude","Lon","Lng"])).replace(",","."));
+    const address = String(getValue(row,["Dirección","Direccion","Domicilio","Calle"]) || "").trim();
+    return {id:index+1,date,client,type,province,city,address,product,billing,
+            lat:Number.isFinite(lat)?lat:null,lon:Number.isFinite(lon)?lon:null};
+  }).filter(r => r.client && r.city && r.billing !== 0);
+}
+
+function money(value){
+  return new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(value || 0);
+}
+
+function monthKey(date){
+  if(!date) return "sin-fecha";
+  return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0");
+}
+
+function currentFilteredRows(){
+  if(!importedRows.length) return [];
+  const province = provinceSelect.selectedOptions[0]?.dataset.name || "";
+  const city = citySelect.value || "";
+  return importedRows.filter(r =>
+    (!province || cleanKey(r.province) === cleanKey(province)) &&
+    (!city || cleanKey(r.city) === cleanKey(city))
+  );
+}
+
+function latestTwoMonths(rows){
+  const keys = [...new Set(rows.filter(r=>r.date).map(r=>monthKey(r.date)))].sort();
+  return keys.slice(-2);
+}
+
+function calcGrowth(rows){
+  const months = latestTwoMonths(rows);
+  if(months.length < 2) return 0;
+  const prev = rows.filter(r=>monthKey(r.date)===months[0]).reduce((s,r)=>s+r.billing,0);
+  const curr = rows.filter(r=>monthKey(r.date)===months[1]).reduce((s,r)=>s+r.billing,0);
+  return prev ? ((curr-prev)/prev)*100 : (curr ? 100 : 0);
+}
+
+function aggregateClients(rows, type){
+  const map = new Map();
+  rows.filter(r=>r.type===type).forEach(r=>{
+    const key = cleanKey(r.client);
+    if(!map.has(key)) map.set(key,{name:r.client,billing:0,products:new Set(),cities:new Set(),rows:[]});
+    const item = map.get(key);
+    item.billing += r.billing;
+    item.products.add(r.product);
+    item.cities.add(r.city);
+    item.rows.push(r);
+  });
+  return [...map.values()].sort((a,b)=>b.billing-a.billing);
+}
+
+function renderImportedData(){
+  if(!importedRows.length) return;
+  const rows = currentFilteredRows();
+  const dist = aggregateClients(rows,"Distribuidor");
+  const pdv = aggregateClients(rows,"Punto de venta directo");
+  const total = rows.reduce((s,r)=>s+r.billing,0);
+  const distTotal = dist.reduce((s,r)=>s+r.billing,0);
+  const pdvTotal = pdv.reduce((s,r)=>s+r.billing,0);
+  const growth = calcGrowth(rows);
+  const families = new Set(rows.map(r=>r.product));
+  const activeClients = new Set(rows.map(r=>cleanKey(r.client))).size;
+  const idz = Math.min(100, Math.round((families.size/10)*55 + Math.min(activeClients,30)/30*45));
+  const coverage = Math.min(100, Math.round((new Set(rows.map(r=>cleanKey(r.city))).size/10)*100));
+
+  document.getElementById("idzValue").innerHTML = idz + '<span style="font-size:18px">/100</span>';
+  document.getElementById("clientsValue").textContent = dist.length;
+  document.getElementById("distributorsValue").textContent = pdv.length;
+  document.getElementById("coverageValue").innerHTML = coverage + '<span style="font-size:18px">%</span>';
+  const gSign = growth > 0 ? "+" : "";
+  document.getElementById("growthValue").innerHTML = gSign + growth.toFixed(1).replace(".",",") + '<span style="font-size:18px">%</span>';
+  document.getElementById("growthValue").className = growth >= 0 ? "positive" : "warning";
+
+  document.getElementById("totalBilling").textContent = money(total);
+  document.getElementById("distSummary").textContent = `${dist.length} clientes · ${money(distTotal)}`;
+  document.getElementById("pdvSummary").textContent = `${pdv.length} clientes · ${money(pdvTotal)}`;
+  document.getElementById("distShare").textContent = total ? Math.round(distTotal/total*100)+"%" : "0%";
+  document.getElementById("pdvShare").textContent = total ? Math.round(pdvTotal/total*100)+"%" : "0%";
+
+  const distList = document.getElementById("distList");
+  distList.innerHTML = dist.length ? dist.map((d,i)=>{
+    const growthClient = calcGrowth(d.rows);
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:#fff">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+        <div><strong>${escapeHtml(d.name)}</strong>
+          <div style="color:var(--muted);font-size:12px;margin-top:4px">${escapeHtml([...d.cities].join(" · "))}</div>
+        </div>
+        <div style="text-align:right"><strong>${money(d.billing)}</strong>
+          <div style="color:${growthClient>=0?'var(--green)':'var(--red)'};font-size:12px">${growthClient>=0?'+':''}${growthClient.toFixed(1).replace(".",",")}%</div>
+        </div>
+      </div>
+      <div style="margin-top:9px;color:var(--muted);font-size:12px">Productos: ${escapeHtml([...d.products].join(", "))}</div>
+    </div>`;
+  }).join("") : '<div class="empty-state">No hay distribuidores en esta selección.</div>';
+
+  const pdvBody = document.getElementById("pdvTableBody");
+  pdvBody.innerHTML = pdv.length ? pdv.slice(0,50).map(p=>{
+    const g = calcGrowth(p.rows);
+    return `<tr><td>${escapeHtml(p.name)}</td><td>${money(p.billing)}</td>
+      <td><span style="color:${g>=0?'var(--green)':'var(--red)'}">${g>=0?'+':''}${g.toFixed(1).replace(".",",")}%</span></td></tr>`;
+  }).join("") : '<tr><td colspan="3" class="empty-state">No hay puntos de venta directos.</td></tr>';
+
+  fillProductFilter();
+  renderInlineCommercialDetails(rows);
+  renderMap();
+}
+
+function escapeHtml(value){
+  return String(value ?? "").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+async function handleSalesFile(file){
+  try{
+    showStatus("Procesando archivo…");
+    const data = await file.arrayBuffer();
+    let workbook;
+    if(file.name.toLowerCase().endsWith(".csv")){
+      const text = new TextDecoder("utf-8").decode(data);
+      workbook = XLSX.read(text,{type:"string"});
+    }else{
+      workbook = XLSX.read(data,{type:"array",cellDates:true});
+    }
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rawRows = XLSX.utils.sheet_to_json(sheet,{defval:""});
+    const normalized = normalizeRows(rawRows);
+    if(!normalized.length) throw new Error("No encontré filas válidas. Revisá las columnas del archivo modelo.");
+    importedRows = normalized;
+    localStorage.setItem("geoVentasRows", JSON.stringify(importedRows.map(r=>({...r,date:r.date?r.date.toISOString():null}))));
+    rebuildZoneSelectors();
+    renderImportedData();
+    showStatus(`✓ ${normalized.length} operaciones cargadas correctamente desde ${file.name}.`,"ok");
+  }catch(error){
+    console.error(error);
+    showStatus("No se pudo cargar el archivo: "+error.message,"error");
+  }
+}
+
+function showStatus(text,type=""){
+  const el = document.getElementById("dataStatus");
+  el.style.display="block";
+  el.className="data-status "+type;
+  el.textContent=text;
+}
+
+function rebuildZoneSelectors(){
+  if(!importedRows.length) return;
+  const provinces = [...new Set(importedRows.map(r=>r.province).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+  provinceSelect.innerHTML='<option value="ALL" data-name="Todo el país">Todo el país</option><option value="">Todas las provincias</option>';
+  provinces.forEach((name,i)=>{
+    const o=document.createElement("option");o.value="data-"+i;o.dataset.name=name;o.textContent=name;provinceSelect.appendChild(o);
+  });
+  const preferred = provinces.find(p=>cleanKey(p)==="entre rios") || provinces[0];
+  const option=[...provinceSelect.options].find(o=>o.dataset.name===preferred);
+  if(option) provinceSelect.value=option.value;
+  rebuildCitySelector();
+}
+
+function rebuildCitySelector(){
+  const province=provinceSelect.selectedOptions[0]?.dataset.name||"";
+  const cities=[...new Set(importedRows.filter(r=>!province||cleanKey(r.province)===cleanKey(province)).map(r=>r.city).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,"es"));
+  citySelect.innerHTML='<option value="">Todas las localidades</option>';
+  cities.forEach(name=>{const o=document.createElement("option");o.value=name;o.textContent=name;citySelect.appendChild(o);});
+  const preferred=cities.find(c=>cleanKey(c)==="parana")||cities[0]||"";
+  citySelect.value=preferred;
+  setHeader(preferred||"Todas",province||"Todas");
+  renderImportedData();
+}
+
+function fillProductFilter(){
+  const select=document.getElementById("mapProductFilter");
+  const current=select.value;
+  const products=[...new Set(importedRows.map(r=>r.product).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+  select.innerHTML='<option value="">Todas las familias</option>'+products.map(p=>`<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+  if(products.includes(current)) select.value=current;
+}
+
+function initMap(){renderOfflineMap();}
+
+async function geocodeLocality(city,province){
+  const key=cleanKey(city+"|"+province);
+  if(georefCache.has(key)) return georefCache.get(key);
+  try{
+    const url="https://apis.datos.gob.ar/georef/api/localidades?nombre="+encodeURIComponent(city)+
+      "&provincia="+encodeURIComponent(province)+"&max=10&campos=nombre,provincia.nombre,centroide";
+    const res=await fetch(url);
+    const data=await res.json();
+    const list=data.localidades||data.resultados||[];
+    const best=list.find(x=>cleanKey(x.nombre)===cleanKey(city))||list[0];
+    const coord=best?.centroide ? {lat:Number(best.centroide.lat),lon:Number(best.centroide.lon)} : null;
+    georefCache.set(key,coord);
+    return coord;
+  }catch(e){
+    georefCache.set(key,null);return null;
+  }
+}
+
+async function renderMap(){renderOfflineMap();}
+
+function downloadTemplate(){
+  const rows=[
+    ["Fecha","Cliente","Tipo de cliente","Provincia","Localidad","Producto","Facturación neta","Latitud","Longitud"],
+    ["01/07/2026","Centro Distribuidora","Distribuidor","Entre Ríos","Paraná","Gaseosas",2500000,-31.73197,-60.5238],
+    ["03/07/2026","Supermercado Norte","Punto de venta directo","Entre Ríos","Paraná","Agua",420000,-31.73197,-60.5238],
+    ["07/07/2026","Autoservicio Crespo","Punto de venta directo","Entre Ríos","Crespo","Concentrados",280000,-32.0287,-60.3066]
+  ];
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Ventas");
+  XLSX.writeFile(wb,"Modelo_GeoVentas.xlsx");
+}
+
+function clearImportedData(){
+  importedRows=[];localStorage.removeItem("geoVentasRows");
+  location.reload();
+}
+
+document.getElementById("salesFile").addEventListener("change",e=>{
+  const file=e.target.files?.[0];if(file) handleSalesFile(file);
+});
+
+const originalProvinceChange=provinceSelect.onchange;
+provinceSelect.addEventListener("change",()=>{
+  if(importedRows.length) rebuildCitySelector();
+});
+citySelect.addEventListener("change",()=>{
+  if(importedRows.length){
+    const province=provinceSelect.selectedOptions[0]?.dataset.name||"";
+    setHeader(citySelect.value||"Todas",province||"Todas");
+    renderImportedData();
+  }
+});
+
+try{
+  const saved=JSON.parse(localStorage.getItem("geoVentasRows")||"[]");
+  if(saved.length){
+    importedRows=saved.map(r=>({...r,date:r.date?new Date(r.date):null}));
+    setTimeout(()=>{rebuildZoneSelectors();showStatus(`✓ ${importedRows.length} operaciones recuperadas del último archivo cargado.`,"ok");},150);
+  }else{
+    setTimeout(()=>{initMap();renderMap();},150);
+  }
+}catch(e){setTimeout(()=>{initMap();renderMap();},150);}
+
+
+function switchView(view){
+  const geo=document.getElementById("geoView"),
+        commercial=document.getElementById("commercialView"),
+        sellers=document.getElementById("sellersView");
+  geo.classList.toggle("hidden",view!=="geo");
+  commercial.classList.toggle("hidden",view!=="commercial");
+  sellers.classList.toggle("hidden",view!=="sellers");
+  document.getElementById("tabGeo").classList.toggle("active",view==="geo");
+  document.getElementById("tabCommercial").classList.toggle("active",view==="commercial");
+  document.getElementById("tabSellers").classList.toggle("active",view==="sellers");
+
+  const zoneSelectors=document.getElementById("zoneSelectors");
+  const locationStatus=document.getElementById("locationStatus");
+  if(zoneSelectors) zoneSelectors.style.display=view==="geo"?"contents":"none";
+  if(locationStatus) locationStatus.style.display=view==="geo"?"block":"none";
+
+  if(view==="geo") setTimeout(renderOfflineMap,50);
+}
+
+window.addEventListener("resize", ()=>{
+  if(salesMap) setTimeout(()=>salesMap.invalidateSize(false), 100);
+});
+
+document.addEventListener("visibilitychange", ()=>{
+  if(!document.hidden && salesMap) setTimeout(()=>salesMap.invalidateSize(true), 200);
+});
+
+const weeklyFile = document.getElementById("weeklyFile");
+if(weeklyFile){
+  weeklyFile.addEventListener("change", e=>{
+    const file=e.target.files?.[0];
+    if(file){
+      alert("Archivo seleccionado: "+file.name+"\\nLa próxima adaptación leerá automáticamente el formato original del supervisor.");
+    }
+  });
+}
+
+
+const demoOffline={"Paraná":{clients:20,billing:26670000,products:["Gaseosas","Agua","Concentrados"]},"Crespo":{clients:5,billing:4200000,products:["Gaseosas","Cerveza Golden Saft"]},"Nogoyá":{clients:2,billing:1300000,products:["Agua","Dulces"]},"Santa Fe":{clients:0,billing:0,products:[]}};function offlineData(){if(!importedRows.length)return demoOffline;const g={};importedRows.forEach(r=>{if(!g[r.city])g[r.city]={clients:new Set(),billing:0,products:new Set()};g[r.city].clients.add(r.client);g[r.city].billing+=r.billing;g[r.city].products.add(r.product)});const o={};Object.entries(g).forEach(([c,d])=>o[c]={clients:d.clients.size,billing:d.billing,products:[...d.products]});return o};
+
+function selectedProvinceName(){
+  return provinceSelect?.selectedOptions?.[0]?.dataset?.name ||
+         provinceSelect?.selectedOptions?.[0]?.textContent ||
+         "Seleccione una provincia";
+}
+
+function provinceRows(){
+  const province = selectedProvinceName();
+  if(importedRows.length){
+    const rows = importedRows.filter(r => cleanKey(r.province) === cleanKey(province));
+    const grouped = new Map();
+    rows.forEach(r=>{
+      const key=cleanKey(r.city);
+      if(!grouped.has(key)){
+        grouped.set(key,{city:r.city,clients:new Set(),billing:0,products:new Set()});
+      }
+      const g=grouped.get(key);
+      g.clients.add(r.client);
+      g.billing += r.billing;
+      g.products.add(r.product);
+    });
+    const real=[...grouped.values()].map(g=>({
+      city:g.city,clients:g.clients.size,billing:g.billing,products:[...g.products],
+      level:g.clients.size>=10?"alto":g.clients.size>=4?"medio":"bajo"
+    }));
+    if(real.length) return real;
+  }
+
+  if(provinceDemoData[province]) return provinceDemoData[province];
+
+  const names=[...citySelect.options]
+    .map(o=>o.value || o.textContent)
+    .filter(v=>v && !cleanKey(v).includes("seleccione") && !cleanKey(v).includes("todas"));
+  return names.slice(0,40).map(city=>({
+    city,clients:0,billing:0,products:[],level:"sin datos"
+  }));
+}
+
+function markerPositions(count){
+  const points=[];
+  const cx=350,cy=235,rx=205,ry=155;
+  for(let i=0;i<count;i++){
+    const angle=i*2.399963229728653;
+    const radius=Math.sqrt((i+.7)/Math.max(count,1));
+    const x=cx+Math.cos(angle)*rx*radius;
+    const y=cy+Math.sin(angle)*ry*radius;
+    points.push([Math.round(x),Math.round(y)]);
+  }
+  return points;
+}
+
+
+
+document.getElementById("offlineMap")?.addEventListener("click",()=>{
+  const tip=document.getElementById("mapTip");
+  if(tip) tip.style.display="none";
+});
+
+document.addEventListener("DOMContentLoaded",()=>setTimeout(renderOfflineMap,120));
+
+
+provinceSelect?.addEventListener("change",()=>setTimeout(renderOfflineMap,120));
+citySelect?.addEventListener("change",()=>setTimeout(renderOfflineMap,80));
+document.getElementById("mapProductFilter")?.addEventListener("change",()=>setTimeout(renderOfflineMap,50));
+
+
+function toggleKpiDetail(id){
+  const target=document.getElementById(id);
+  if(!target) return;
+  const wasOpen=target.classList.contains("open");
+  document.querySelectorAll(".kpi.clickable.open").forEach(el=>el.classList.remove("open"));
+  if(!wasOpen) target.classList.add("open");
+}
+
+function renderInlineCommercialDetails(rows){
+  if(!rows || !rows.length) return;
+  const dist=aggregateClients(rows,"Distribuidor");
+  const pdv=aggregateClients(rows,"Punto de venta directo");
+  const total=rows.reduce((s,r)=>s+r.billing,0);
+  const distTotal=dist.reduce((s,r)=>s+r.billing,0);
+  const pdvTotal=pdv.reduce((s,r)=>s+r.billing,0);
+
+  const distBox=document.getElementById("distributorInlineDetail");
+  const pdvBox=document.getElementById("pdvInlineDetail");
+  if(distBox){
+    distBox.innerHTML=(dist.slice(0,8).map(d=>{const first=d.rows?.[0]||{};const g=calcGrowth(d.rows||[]);return `<div class="kpi-detail-row">
+      <div><b>${escapeHtml(d.name)}</b><br><span>${escapeHtml(first.address||[...d.cities].join(" · "))}</span><br><span>Productos: ${escapeHtml([...d.products].join(", "))}</span></div>
+      <div style="text-align:right"><b>${money(d.billing)}</b><br><span style="color:${g>=0?'var(--green)':'var(--red)'}">${g>=0?'+':''}${g.toFixed(1).replace('.',',')}%</span></div>
+    </div>`}).join("") || '<div class="empty-state">No hay distribuidores en esta selección.</div>')+
+    `<div class="kpi-detail-row"><span>Participación en la facturación</span><b>${total?Math.round(distTotal/total*100):0}%</b></div>`;
+  }
+  if(pdvBox){
+    pdvBox.innerHTML=(pdv.slice(0,10).map(p=>{const first=p.rows?.[0]||{};const g=calcGrowth(p.rows||[]);return `<div class="kpi-detail-row">
+      <div><b>${escapeHtml(p.name)}</b><br><span>${escapeHtml(first.address||[...p.cities].join(" · "))}</span><br><span>Productos: ${escapeHtml([...p.products].join(", "))}</span></div>
+      <div style="text-align:right"><b>${money(p.billing)}</b><br><span style="color:${g>=0?'var(--green)':'var(--red)'}">${g>=0?'+':''}${g.toFixed(1).replace('.',',')}%</span></div>
+    </div>`}).join("") || '<div class="empty-state">No hay puntos de venta directos en esta selección.</div>')+
+    `<div class="kpi-detail-row"><span>Participación en la facturación</span><b>${total?Math.round(pdvTotal/total*100):0}%</b></div>`;
+  }
+}
+
+
+
+
+
+const productColors = {
+  "Golden Saft":"#f4c400",
+  "Agua":"#36a9e1",
+  "Concentrados":"#7b61ff",
+  "Dulces":"#8b5a2b",
+  "Vinto":"#ff7a00",
+  "Fernet F-3":"#222222",
+  "Aqualoe":"#0ca678",
+  "Amargos":"#e63946",
+  "Fideos Manyabene":"#ec4899",
+  "Gaseosas":"#00a8cc",
+  "Mix":"#8e44ad"
+};
+
+const demoDistributorsByProvince = {
+  "Entre Ríos":[
+    {
+      name:"Centro Distribuidora",
+      city:"Paraná",
+      address:"Av. Circunvalación 2450",
+      category:"Mix",
+      families:["Golden Saft","Agua","Concentrados","Dulces"],
+      x:320,y:205
+    },
+    {
+      name:"Campi Distribuidor",
+      city:"Paraná",
+      address:"Av. Almafuerte 1840",
+      category:"Golden Saft",
+      families:["Golden Saft"],
+      x:360,y:235
+    },
+    {
+      name:"Distribuidora Victoria",
+      city:"Victoria",
+      address:"Ruta 11 km 118",
+      category:"Gaseosas",
+      families:["Gaseosas"],
+      x:235,y:305
+    },
+    {
+      name:"Distribuidora Concordia",
+      city:"Concordia",
+      address:"Av. Monseñor Rösch 3100",
+      category:"Mix",
+      families:["Golden Saft","Agua","Fernet F-3"],
+      x:430,y:120
+    }
+  ],
+  "Santa Fe":[
+    {
+      name:"Distribuidora Litoral",
+      city:"Santa Fe",
+      address:"Av. Blas Parera 7800",
+      category:"Mix",
+      families:["Golden Saft","Agua","Gaseosas"],
+      x:330,y:215
+    },
+    {
+      name:"Rosario Bebidas",
+      city:"Rosario",
+      address:"Bv. Seguí 4200",
+      category:"Golden Saft",
+      families:["Golden Saft"],
+      x:290,y:310
+    }
+  ],
+  "San Juan":[
+    {
+      name:"Cuyo Distribuciones",
+      city:"San Juan",
+      address:"Av. Rawson 1450",
+      category:"Mix",
+      families:["Golden Saft","Agua","Dulces"],
+      x:350,y:220
+    }
+  ]
+};
+
+
+const provinceMapConfig={
+  "Entre Ríos":{bbox:[-61.0,-34.05,-57.75,-30.05]},
+  "Santa Fe":{bbox:[-62.95,-34.45,-58.85,-28.95]},
+  "San Juan":{bbox:[-70.0,-32.7,-67.0,-28.2]},
+  "La Pampa":{bbox:[-68.35,-39.4,-63.25,-34.9]},
+  "Córdoba":{bbox:[-65.1,-35.1,-61.7,-29.3]},
+  "Buenos Aires":{bbox:[-63.6,-41.2,-56.4,-33.0]},
+  "Mendoza":{bbox:[-70.7,-37.7,-66.3,-32.0]}
+};
+
+const cityMapConfig={
+  "Entre Ríos|Paraná":{bbox:[-60.575,-31.790,-60.445,-31.680]},
+  "Entre Ríos|Victoria":{bbox:[-60.20,-32.66,-60.10,-32.58]},
+  "Entre Ríos|Concordia":{bbox:[-58.10,-31.43,-57.96,-31.32]},
+  "Santa Fe|Santa Fe":{bbox:[-60.76,-31.68,-60.64,-31.56]},
+  "Santa Fe|Rosario":{bbox:[-60.76,-33.04,-60.58,-32.88]},
+  "San Juan|San Juan":{bbox:[-68.60,-31.58,-68.48,-31.49]}
+};
+
+const demoMapClients=[
+  {name:"Centro Distribuidora",type:"Distribuidor",province:"Entre Ríos",city:"Paraná",address:"Av. Circunvalación 2450",category:"Mix",families:["Golden Saft","Agua","Concentrados","Dulces"],billing:10750000,growth:12,lat:-31.7480,lon:-60.5350},
+  {name:"Campi Distribuidor",type:"Distribuidor",province:"Entre Ríos",city:"Paraná",address:"Av. Almafuerte 1840",category:"Golden Saft",families:["Golden Saft"],billing:6970000,growth:4,lat:-31.7442,lon:-60.4876},
+  {name:"Distribuidora Victoria",type:"Distribuidor",province:"Entre Ríos",city:"Victoria",address:"Ruta 11 km 118",category:"Gaseosas",families:["Gaseosas"],billing:3150000,growth:7,lat:-32.6201,lon:-60.1547},
+  {name:"Distribuidora Concordia",type:"Distribuidor",province:"Entre Ríos",city:"Concordia",address:"Av. Monseñor Rösch 3100",category:"Mix",families:["Golden Saft","Agua","Fernet F-3"],billing:5180000,growth:9,lat:-31.3560,lon:-58.0180},
+  {name:"Supermercado Norte",type:"Punto de venta directo",province:"Entre Ríos",city:"Paraná",address:"Av. Don Bosco 1120",category:"Mix",families:["Golden Saft","Agua","Gaseosas"],billing:1800000,growth:8,lat:-31.7208,lon:-60.5162},
+  {name:"Autoservicio Central",type:"Punto de venta directo",province:"Entre Ríos",city:"Paraná",address:"Alameda de la Federación 428",category:"Agua",families:["Agua"],billing:720000,growth:15,lat:-31.7282,lon:-60.5234},
+  {name:"Mayorista Paraná",type:"Punto de venta directo",province:"Entre Ríos",city:"Paraná",address:"Av. de las Américas 2650",category:"Mix",families:["Golden Saft","Dulces","Vinto","Fernet F-3"],billing:2300000,growth:4,lat:-31.7655,lon:-60.4930},
+  {name:"Despensa El Puente",type:"Punto de venta directo",province:"Entre Ríos",city:"Paraná",address:"Av. Ramírez 1895",category:"Golden Saft",families:["Golden Saft"],billing:460000,growth:-2,lat:-31.7405,lon:-60.5070}
+];
+
+function selectedProvinceLabel(){
+  return provinceSelect?.selectedOptions?.[0]?.dataset?.name ||
+         provinceSelect?.selectedOptions?.[0]?.textContent || "Provincia";
+}
+
+function selectedCityLabel(){
+  const option=citySelect?.selectedOptions?.[0];
+  if(!option) return "";
+  const text=(option.dataset?.name || option.textContent || "").trim();
+  if(!text || cleanKey(text).includes("seleccione") || cleanKey(text).includes("todas las localidades")) return "";
+  return text;
+}
+
+function selectedMapBbox(province,city){
+  return cityMapConfig[province+"|"+city]?.bbox || provinceMapConfig[province]?.bbox || provinceMapConfig["Entre Ríos"].bbox;
+}
+
+function mapClients(){
+  const province=selectedProvinceLabel();
+  const selectedCity=selectedCityLabel();
+  const family=document.getElementById("mapProductFilter")?.value || "";
+
+  if(importedRows.length){
+    const rows=importedRows.filter(r =>
+      cleanKey(r.province)===cleanKey(province) &&
+      (!selectedCity || cleanKey(r.city)===cleanKey(selectedCity)) &&
+      (!family || cleanKey(r.product)===cleanKey(family))
+    );
+    const grouped=new Map();
+    rows.forEach(r=>{
+      const key=cleanKey(r.client);
+      if(!grouped.has(key)) grouped.set(key,{name:r.client,type:r.type,province:r.province,city:r.city,address:r.address||"Dirección no cargada",families:new Set(),billing:0,lat:r.lat,lon:r.lon,rows:[]});
+      const g=grouped.get(key); g.families.add(r.product); g.billing+=r.billing; g.rows.push(r);
+      if(Number.isFinite(r.lat)&&Number.isFinite(r.lon)){g.lat=r.lat;g.lon=r.lon;}
+    });
+    const list=[...grouped.values()].map(g=>{
+      const families=[...g.families];
+      return {...g,families,category:families.length>1?"Mix":(families[0]||"Mix"),growth:calcGrowth(g.rows)};
+    }).filter(g=>Number.isFinite(g.lat)&&Number.isFinite(g.lon));
+    if(list.length) return list;
+  }
+
+  return demoMapClients.filter(d=>
+    cleanKey(d.province)===cleanKey(province) &&
+    (!selectedCity || cleanKey(d.city)===cleanKey(selectedCity)) &&
+    (!family || d.families.some(f=>cleanKey(f)===cleanKey(family)))
+  );
+}
+
+
+
+
+
+
+const MAP_COLORS = {
+  "Golden Saft":"#f4c400",
+  "Agua":"#36a9e1",
+  "Concentrados":"#7b61ff",
+  "Dulces":"#8b5a2b",
+  "Vinto":"#ff7a00",
+  "Fernet F-3":"#222222",
+  "Aqualoe":"#0ca678",
+  "Amargos":"#e63946",
+  "Fideos Manyabene":"#ec4899",
+  "Gaseosas":"#00a8cc",
+  "Mix":"#8e44ad"
+};
+
+const DEMO_MAP_DATA = {
+  "Entre Ríos": {
+    center:[-31.7413,-60.5115],
+    zoom:12,
+    cities:{
+      "Paraná":{
+        center:[-31.7413,-60.5115],
+        zoom:13,
+        distributors:[
+          {
+            name:"Centro Distribuidora",
+            address:"Av. Don Bosco 1550, Paraná, Entre Ríos",
+            zone:"Paraná, Crespo y Nogoyá",
+            category:"Mix",
+            mapColor:"#2f80ed",
+            coverageColor:"#2f80ed",
+            families:["Golden Saft","Agua","Concentrados","Dulces"],
+            coords:[-31.7580,-60.5420],
+            coverage:[
+              [-31.705,-60.595],[-31.690,-60.520],[-31.715,-60.455],
+              [-31.770,-60.450],[-31.805,-60.520],[-31.785,-60.600]
+            ]
+          },
+          {
+            name:"Campi Distribuidor",
+            address:"Av. Almafuerte 1840, Paraná, Entre Ríos",
+            zone:"Paraná capital y alrededores",
+            category:"Golden Saft",
+            mapColor:"#f2994a",
+            coverageColor:"#f2994a",
+            families:["Golden Saft"],
+            coords:[-31.7318,-60.4945],
+            coverage:[
+              [-31.700,-60.530],[-31.695,-60.465],[-31.730,-60.430],
+              [-31.785,-60.455],[-31.790,-60.520],[-31.750,-60.545]
+            ]
+          }
+        ],
+        pdv:[
+          {name:"Supermercado Norte",address:"Av. Don Bosco 1120, Paraná",category:"Agua",coords:[-31.7188,-60.5018]},
+          {name:"Autoservicio Central",address:"Alameda de la Federación 428, Paraná",category:"Gaseosas",coords:[-31.7295,-60.5288]},
+          {name:"Mayorista Paraná",address:"Av. de las Américas 2650, Paraná",category:"Mix",coords:[-31.7705,-60.5185]},
+          {name:"Despensa El Puente",address:"Av. Ramírez 1895, Paraná",category:"Golden Saft",coords:[-31.7462,-60.5072]}
+        ]
+      }
+    }
+  }
+};
+
+
+
+
+
+
+
+(function(){
+  const demoByLocation = {
+    "parana|entre rios":[
+      {
+        name:"Centro Distribuidora",
+        address:"Av. Don Bosco 1120, Paraná, Entre Ríos",
+        zone:"Paraná, Crespo y Nogoyá",
+        products:["Golden Saft","Agua","Concentrados","Dulces"],
+        billing:10750000,
+        growth:12,
+        color:"#2f80ed",
+        fallback:[-31.7165,-60.5085]
+      },
+      {
+        name:"Campi Distribuidor",
+        address:"Av. Almafuerte 1840, Paraná, Entre Ríos",
+        zone:"Paraná capital y alrededores",
+        products:["Golden Saft"],
+        billing:6970000,
+        growth:4,
+        color:"#f2994a",
+        fallback:[-31.7318,-60.4945]
+      }
+    ]
+  };
+
+
+  const pdvByLocation = {
+    "parana|entre rios":[
+      {name:"Supermercado Norte",address:"Av. Don Bosco 1120, Paraná, Entre Ríos",products:["Golden Saft","Agua","Gaseosas"],billing:1800000,growth:8,fallback:[-31.7200,-60.5005],lastPurchase:"2026-07-22"},
+      {name:"Autoservicio Central",address:"Alameda de la Federación 428, Paraná, Entre Ríos",products:["Agua"],billing:720000,growth:15,fallback:[-31.7295,-60.5288],lastPurchase:"2026-07-18"},
+      {name:"Mayorista Paraná",address:"Av. de las Américas 2650, Paraná, Entre Ríos",products:["Golden Saft","Dulces","Vinto","Fernet F-3"],billing:2300000,growth:4,fallback:[-31.7705,-60.5185],lastPurchase:"2026-07-05"},
+      {name:"Despensa El Puente",address:"Av. Ramírez 1895, Paraná, Entre Ríos",products:["Golden Saft"],billing:460000,growth:-2,fallback:[-31.7462,-60.5072],lastPurchase:"2026-06-30"},
+      {name:"Autoservicio San Agustín",address:"Av. Ejército 2250, Paraná, Entre Ríos",products:["Golden Saft","Agua"],billing:610000,growth:6,fallback:[-31.7590,-60.5370],lastPurchase:"2026-06-15"},
+      {name:"Kiosco Don Bosco",address:"Av. Don Bosco 2350, Paraná, Entre Ríos",products:["Gaseosas"],billing:330000,growth:3,fallback:[-31.7125,-60.4935],lastPurchase:"2026-05-10"},
+      {name:"Supermercado Oeste",address:"Av. Almafuerte 3400, Paraná, Entre Ríos",products:["Golden Saft","Dulces"],billing:1250000,growth:9,fallback:[-31.7360,-60.4750],lastPurchase:"2026-07-12"},
+      {name:"Autoservicio Sur",address:"Av. de las Américas 3900, Paraná, Entre Ríos",products:["Agua","Vinto"],billing:540000,growth:2,fallback:[-31.7810,-60.5230],lastPurchase:"2026-07-08"},
+      {name:"Despensa La Plaza",address:"Urquiza 980, Paraná, Entre Ríos",products:["Golden Saft"],billing:420000,growth:5,fallback:[-31.7380,-60.5280],lastPurchase:"2026-06-25"},
+      {name:"Maxikiosco Centro",address:"25 de Mayo 650, Paraná, Entre Ríos",products:["Gaseosas","Agua"],billing:380000,growth:7,fallback:[-31.7335,-60.5305],lastPurchase:"2026-07-01"},
+      {name:"Autoservicio Güemes",address:"Güemes 1450, Paraná, Entre Ríos",products:["Golden Saft","Fernet F-3"],billing:690000,growth:10,fallback:[-31.7430,-60.5350],lastPurchase:"2026-04-20"},
+      {name:"Despensa San Benito",address:"Av. Jorge Newbery 2100, Paraná, Entre Ríos",products:["Golden Saft","Agua"],billing:510000,growth:4,fallback:[-31.7890,-60.4960],lastPurchase:"2026-07-14"},
+      {name:"Mercado Ramírez",address:"Av. Ramírez 3100, Paraná, Entre Ríos",products:["Dulces","Vinto"],billing:760000,growth:8,fallback:[-31.7600,-60.5120],lastPurchase:"2026-06-10"},
+      {name:"Autoservicio Paraná Norte",address:"Av. Blas Parera 1500, Paraná, Entre Ríos",products:["Golden Saft","Agua"],billing:840000,growth:11,fallback:[-31.7140,-60.4840],lastPurchase:"2026-07-03"},
+      {name:"Despensa Costanera",address:"Laurencena 900, Paraná, Entre Ríos",products:["Gaseosas"],billing:350000,growth:1,fallback:[-31.7260,-60.5400],lastPurchase:"2026-06-29"},
+      {name:"Supermercado Echagüe",address:"Echagüe 1800, Paraná, Entre Ríos",products:["Golden Saft","Dulces","Agua"],billing:980000,growth:6,fallback:[-31.7490,-60.5220],lastPurchase:"2026-07-16"},
+      {name:"Autoservicio Newbery",address:"Av. Jorge Newbery 3200, Paraná, Entre Ríos",products:["Golden Saft"],billing:470000,growth:3,fallback:[-31.7930,-60.4870],lastPurchase:"2026-05-25"},
+      {name:"Mercado Circunvalación",address:"Acceso Norte 2200, Paraná, Entre Ríos",products:["Agua","Gaseosas","Golden Saft"],billing:890000,growth:9,fallback:[-31.7050,-60.4700],lastPurchase:"2026-07-07"}
+    ]
+  };
+
+  const nationalDemo = [
+    {
+      name:"Centro Distribuidora",
+      province:"Entre Ríos",
+      city:"Paraná",
+      address:"Av. Don Bosco 1120, Paraná, Entre Ríos",
+      zone:"Paraná, Crespo y Nogoyá",
+      products:["Golden Saft","Agua","Concentrados","Dulces"],
+      billing:10750000,growth:12,lastPurchase:"2026-07-20",color:"#2f80ed",fallback:[-31.7188,-60.5018]
+    },
+    {
+      name:"Campi Distribuidor",
+      province:"Entre Ríos",
+      city:"Paraná",
+      address:"Av. Almafuerte 1840, Paraná, Entre Ríos",
+      zone:"Paraná capital y alrededores",
+      products:["Golden Saft"],
+      billing:6970000,growth:4,lastPurchase:"2026-05-01",color:"#f2994a",fallback:[-31.7318,-60.4945]
+    },
+    {
+      name:"Distribuidora Saladillo",
+      province:"Buenos Aires",
+      city:"Saladillo",
+      address:"Ruta Nacional 205 km 180, Saladillo, Buenos Aires",
+      zone:"Zárate, La Plata y Conurbano",
+      products:["Golden Saft","Agua"],
+      billing:12400000,growth:9,lastPurchase:"2026-07-10",color:"#27ae60",fallback:[-35.6388,-59.7770]
+    },
+    {
+      name:"Cuyo Distribuciones",
+      province:"Mendoza",
+      city:"Mendoza",
+      address:"Av. San Martín 1800, Mendoza",
+      zone:"Gran Mendoza",
+      products:["Gaseosas","Agua","Vinto"],
+      billing:8200000,growth:7,lastPurchase:"2026-06-28",color:"#9b51e0",fallback:[-32.8895,-68.8458]
+    },
+    {
+      name:"Distribuidora Litoral",
+      province:"Santa Fe",
+      city:"Rosario",
+      address:"Bv. Seguí 4200, Rosario, Santa Fe",
+      zone:"Rosario y alrededores",
+      products:["Golden Saft","Fernet F-3"],
+      billing:9600000,growth:11,lastPurchase:"2026-07-15",color:"#eb5757",fallback:[-32.9587,-60.6939]
+    }
+  ];
+
+  const nationalPdvDemo = [
+    {
+      name:"Supermercado Norte",
+      province:"Entre Ríos",city:"Paraná",
+      address:"Av. Don Bosco 1120, Paraná, Entre Ríos",
+      products:["Golden Saft","Agua","Gaseosas"],
+      billing:1800000,growth:8,
+      fallback:[-31.7188,-60.5018]
+    },
+    {
+      name:"Autoservicio Central",
+      province:"Entre Ríos",city:"Paraná",
+      address:"Alameda de la Federación 428, Paraná, Entre Ríos",
+      products:["Agua"],
+      billing:720000,growth:15,
+      fallback:[-31.7295,-60.5288]
+    },
+    {
+      name:"Mercado Mendoza",
+      province:"Mendoza",city:"Mendoza",
+      address:"Av. San Martín 950, Mendoza",
+      products:["Gaseosas","Agua"],
+      billing:1250000,growth:6,
+      fallback:[-32.8893,-68.8458]
+    },
+    {
+      name:"Autoservicio Rosario",
+      province:"Santa Fe",city:"Rosario",
+      address:"Bv. Oroño 1600, Rosario, Santa Fe",
+      products:["Golden Saft"],
+      billing:980000,growth:5,
+      fallback:[-32.9591,-60.6518]
+    }
+  ];
+
+
+  function normalizeText(value){
+    return String(value||"")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase().trim();
+  }
+
+  function cleanMapValue(value){
+    const raw=String(value||"").trim();
+    const key=normalizeText(raw);
+    if(!raw || key.includes("seleccione") || key.includes("cargando") ||
+       key.includes("todas las localidades") || key.includes("geoventas")) return "";
+    return raw;
+  }
+
+  function isCountryView(){
+    const select=document.getElementById("provinceSelect");
+    return select?.value==="ALL";
+  }
+
+  function selectedCity(){
+    const select=document.getElementById("citySelect");
+    const option=select?.selectedOptions?.[0];
+    const text=cleanMapValue(option?.textContent);
+    if(text) return text;
+
+    const value=cleanMapValue(select?.value);
+    if(value && !/^\d+$/.test(value)) return value;
+    return "";
+  }
+
+  function selectedProvince(){
+    if(isCountryView()) return "Todo el país";
+    const select=document.getElementById("provinceSelect");
+    const option=select?.selectedOptions?.[0];
+
+    const dataName=cleanMapValue(option?.dataset?.name);
+    if(dataName) return dataName;
+
+    const text=cleanMapValue(option?.textContent);
+    if(text) return text;
+
+    const value=cleanMapValue(select?.value);
+    if(value && !/^\d+$/.test(value)) return value;
+    return "";
+  }
+
+  function locationKey(city,province){
+    return normalizeText(city)+"|"+normalizeText(province);
+  }
+
+  function moneyLocal(value){
+    return new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(value||0);
+  }
+
+  function icon(color){
+    return L.divIcon({
+      className:"",
+      html:`<div style="width:26px;height:26px;border-radius:50%;background:${color};border:5px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)"></div>`,
+      iconSize:[26,26],
+      iconAnchor:[13,13],
+      popupAnchor:[0,-13]
+    });
+  }
+
+  function pdvIcon(){
+    return L.divIcon({
+      className:"",
+      html:`<div class="pdv-map-pin">P</div>`,
+      iconSize:[24,24],
+      iconAnchor:[12,12],
+      popupAnchor:[0,-12]
+    });
+  }
+
+  function pdvPopup(d){
+    return `<div class="map-popup-title">${d.name}</div>
+      <div class="map-popup-row"><b>Tipo:</b> Punto de venta directo</div>
+      <div class="map-popup-row"><b>Dirección:</b> ${d.address}</div>
+      <div class="map-popup-row"><b>Productos:</b> ${d.products.join(", ")}</div>
+      <div class="map-popup-row"><b>Facturación:</b> ${moneyLocal(d.billing)}</div>
+      <div class="map-popup-row"><b>Crecimiento:</b> ${d.growth>=0?"+":""}${d.growth}%</div>
+      <div class="map-popup-row"><b>Última compra:</b> ${d.lastPurchase || "Sin dato"}</div>`;
+  }
+
+
+  function popup(d){
+    return `<div class="map-popup-title">${d.name}</div>
+      <div class="map-popup-row"><b>Dirección:</b> ${d.address}</div>
+      <div class="map-popup-row"><b>Zona de alcance:</b> ${d.zone}</div>
+      <div class="map-popup-row"><b>Productos:</b> ${d.products.join(", ")}</div>
+      <div class="map-popup-row"><b>Facturación:</b> ${moneyLocal(d.billing)}</div>
+      <div class="map-popup-row"><b>Crecimiento:</b> ${d.growth>=0?"+":""}${d.growth}%</div>
+      <div class="map-popup-row"><b>Última compra:</b> ${d.lastPurchase || "Sin dato"}</div>`;
+  }
+
+  async function geocode(query,fallback=null){
+    const cacheKey="geoventas-geocode:"+query;
+    try{
+      const saved=localStorage.getItem(cacheKey);
+      if(saved){
+        const coords=JSON.parse(saved);
+        if(Array.isArray(coords) && coords.length===2) return coords;
+      }
+    }catch(e){}
+
+    try{
+      const url="https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=ar&q="+
+        encodeURIComponent(query+", Argentina");
+      const response=await fetch(url,{headers:{"Accept":"application/json"}});
+      if(response.ok){
+        const results=await response.json();
+        if(results?.length){
+          const coords=[Number(results[0].lat),Number(results[0].lon)];
+          if(Number.isFinite(coords[0]) && Number.isFinite(coords[1])){
+            try{localStorage.setItem(cacheKey,JSON.stringify(coords));}catch(e){}
+            return coords;
+          }
+        }
+      }
+    }catch(e){}
+    return fallback;
+  }
+
+  let map=null;
+  let layer=null;
+
+
+  function getActiveDays(){
+    const input=document.getElementById("activeDaysInput");
+    const saved=Number(localStorage.getItem("geoVentasActiveDays") || 60);
+    const value=Math.max(1,Math.min(365,Number(input?.value || saved || 60)));
+    return value;
+  }
+
+  function isActiveClient(item){
+    if(!item?.lastPurchase) return true;
+    const last=new Date(item.lastPurchase+"T12:00:00");
+    const now=new Date("2026-07-25T12:00:00");
+    const diff=(now-last)/(1000*60*60*24);
+    return diff <= getActiveDays();
+  }
+
+  function daysSincePurchase(item){
+    if(!item?.lastPurchase) return null;
+    const last=new Date(item.lastPurchase+"T12:00:00");
+    const now=new Date("2026-07-25T12:00:00");
+    return Math.floor((now-last)/(1000*60*60*24));
+  }
+
+
+  function filterBySelection(items, city, province){
+    const p=normalizeText(province);
+    const c=normalizeText(city);
+    return items.filter(item=>{
+      const itemProvince=normalizeText(item.province || item.address || "");
+      const itemCity=normalizeText(item.city || item.address || "");
+      const provinceMatch=!p || itemProvince.includes(p);
+      const cityMatch=!c || itemCity.includes(c);
+      return provinceMatch && cityMatch;
+    });
+  }
+
+  async function draw(){
+    const el=document.getElementById("realSalesMap");
+    const err=document.getElementById("mapError");
+    if(!el) return;
+    if(typeof L==="undefined"){ if(err) err.style.display="block"; return; }
+
+    try{
+      const countryView=isCountryView();
+      const city=selectedCity();
+      const province=selectedProvince();
+      const localKey=locationKey(city,province);
+      let allDemo=[];
+      let allPdvDemo=[];
+
+      if(countryView){
+        allDemo=nationalDemo;
+        allPdvDemo=nationalPdvDemo;
+      }else if(demoByLocation[localKey] || pdvByLocation[localKey]){
+        allDemo=demoByLocation[localKey] || [];
+        allPdvDemo=pdvByLocation[localKey] || [];
+      }else{
+        allDemo=filterBySelection(nationalDemo, city, province);
+        allPdvDemo=filterBySelection(nationalPdvDemo, city, province);
+      }
+
+      const demo=allDemo.filter(isActiveClient);
+      const pdvDemo=allPdvDemo.filter(isActiveClient);
+
+      const citySelect=document.getElementById("citySelect");
+      if(citySelect){
+        citySelect.disabled=countryView;
+        citySelect.style.opacity=countryView?".55":"1";
+      }
+
+      const provinceView=!countryView && !city;
+      document.getElementById("realMapTitle").textContent=
+        countryView ? "Argentina" : provinceView ? province : `${city}, ${province}`;
+      document.getElementById("realMapScope").textContent=
+        countryView ? "Presencia nacional de distribuidores y PDV"
+        : provinceView ? `Clientes activos en ${province}`
+        : `Clientes activos en ${city}`;
+
+      if(!map){
+        map=L.map(el,{zoomControl:true,attributionControl:false,preferCanvas:true});
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,crossOrigin:true}).addTo(map);
+        layer=L.layerGroup().addTo(map);
+      }
+
+      layer.clearLayers();
+
+      if(countryView){
+        const bounds=[];
+        for(const d of demo){
+          const coords=await geocode(d.address,d.fallback);
+          L.marker(coords,{icon:icon(d.color)}).addTo(layer).bindPopup(popup(d));
+          bounds.push(coords);
+        }
+        for(const p of pdvDemo){
+          const coords=await geocode(p.address,p.fallback);
+          L.marker(coords,{icon:pdvIcon()}).addTo(layer).bindPopup(pdvPopup(p));
+          bounds.push(coords);
+        }
+        map.fitBounds(bounds,{padding:[35,35],maxZoom:5});
+      }else{
+        const provinceView=!city;
+        const centerQuery=provinceView ? province : `${city}, ${province}`;
+        const fallbackCenter=provinceView ? [-31.8,-60.5] : [-31.7413,-60.5115];
+        const selectedCenter=await geocode(centerQuery,fallbackCenter);
+        const localBounds=[];
+
+        for(const d of demo){
+          const coords=await geocode(d.address,d.fallback);
+          L.marker(coords,{icon:icon(d.color),zIndexOffset:1000,title:d.name}).addTo(layer).bindPopup(popup(d));
+          localBounds.push(coords);
+        }
+
+        for(const p of pdvDemo){
+          const coords=await geocode(p.address,p.fallback);
+          L.marker(coords,{icon:pdvIcon(),zIndexOffset:100,title:p.name}).addTo(layer).bindPopup(pdvPopup(p));
+          localBounds.push(coords);
+        }
+
+        if(localBounds.length){
+          map.fitBounds(localBounds,{padding:[35,35],maxZoom:provinceView?8:13});
+        }else{
+          map.setView(selectedCenter,provinceView?7:13,{animate:false});
+        }
+      }
+
+      setTimeout(()=>map.invalidateSize(true),100);
+      setTimeout(()=>map.invalidateSize(true),500);
+
+      const status=document.getElementById("realMapStatus");
+      if(status){
+        status.innerHTML=
+          countryView
+            ? `<b>Argentina</b>: ${demo.length} distribuidores y ${pdvDemo.length} PDV activos.`
+            : !city
+              ? `<b>${province}</b>: ${demo.length} distribuidores y ${pdvDemo.length} PDV activos.`
+              : `<b>${city}, ${province}</b>: ${demo.length} distribuidores y ${pdvDemo.length} PDV activos visibles.`;
+      }
+
+      updateCountryCards(demo);
+      updatePdvCard(pdvDemo);
+      if(err) err.style.display="none";
+    }catch(e){
+      console.error(e);
+      if(err) err.style.display="block";
+    }
+  }
+
+
+  function updatePdvCard(list){
+    const detail=document.getElementById("pdvInlineDetail");
+
+    const allLabels=[...document.querySelectorAll("label,h3,h4")];
+    const title=allLabels.find(el=>normalizeText(el.textContent).includes("puntos de venta directos"));
+    if(title){
+      const card=title.closest(".kpi,.card,section,article,div");
+      const value=[...card.querySelectorAll("strong")].find(el=>/^\d+$/.test((el.textContent||"").trim()));
+      if(value) value.textContent=list.length;
+    }
+
+    if(detail){
+      const total=list.reduce((s,p)=>s+(p.billing||0),0);
+      detail.innerHTML=list.map(p=>`<div class="kpi-detail-row">
+        <div><b>${p.name}</b><br>
+        <span><b>Dirección:</b> ${p.address}</span><br>
+        <span><b>Productos:</b> ${p.products.join(", ")}</span><br>
+        <span><b>Última compra:</b> ${p.lastPurchase || "Sin dato"}</span><br>
+        <span class="active-badge">Activo</span></div>
+        <div style="text-align:right"><b>${moneyLocal(p.billing)}</b><br>
+        <span style="color:${p.growth<0?'#d64545':'var(--green)'}">${p.growth>=0?"+":""}${p.growth}%</span></div>
+      </div>`).join("")+
+      `<div class="kpi-detail-row"><span>Facturación total</span><b>${moneyLocal(total)}</b></div>`;
+    }
+  }
+
+  function updateCountryCards(list){
+    const distCount=document.getElementById("clientsValue");
+    if(distCount) distCount.textContent=list.length;
+
+    const distBox=document.getElementById("distributorInlineDetail");
+    if(distBox){
+      const total=list.reduce((s,d)=>s+(d.billing||0),0);
+      distBox.innerHTML=list.map(d=>`<div class="kpi-detail-row">
+        <div><b>${d.name}</b><br>
+        <span><b>Dirección:</b> ${d.address}</span><br>
+        <span><b>Zona:</b> ${d.zone}</span><br>
+        <span><b>Productos:</b> ${d.products.join(", ")}</span><br>
+        <span><b>Última compra:</b> ${d.lastPurchase || "Sin dato"}</span><br>
+        <span class="active-badge">Activo</span></div>
+        <div style="text-align:right"><b>${moneyLocal(d.billing)}</b><br>
+        <span style="color:var(--green)">${d.growth>=0?"+":""}${d.growth}%</span></div>
+      </div>`).join("")+
+      `<div class="kpi-detail-row"><span>Facturación total</span><b>${moneyLocal(total)}</b></div>`;
+    }
+  }
+
+  document.getElementById("provinceSelect")?.addEventListener("change",()=>setTimeout(draw,350));
+  document.getElementById("citySelect")?.addEventListener("change",()=>setTimeout(draw,250));
+  window.addEventListener("resize",()=>map&&setTimeout(()=>map.invalidateSize(true),100));
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",()=>setTimeout(draw,300));
+  }else{
+    setTimeout(draw,300);
+  }
+})();
+
+
+
+
+
+function ensureAllCountryOption(){
+  const provinceSelect=document.getElementById("provinceSelect");
+  if(!provinceSelect) return;
+  if(![...provinceSelect.options].some(o=>o.value==="ALL")){
+    const option=document.createElement("option");
+    option.value="ALL";
+    option.dataset.name="Todo el país";
+    option.textContent="Todo el país";
+    provinceSelect.insertBefore(option,provinceSelect.firstChild);
+  }
+}
+document.addEventListener("DOMContentLoaded",()=>{
+  setTimeout(ensureAllCountryOption,300);
+  setTimeout(ensureAllCountryOption,900);
+});
+window.addEventListener("load",()=>setTimeout(ensureAllCountryOption,300));
+
+
+const chessFile=document.getElementById("chessFile");
+if(chessFile){
+  chessFile.addEventListener("change",e=>{
+    const file=e.target.files?.[0];
+    if(!file) return;
+    const salesInput=document.getElementById("salesFile");
+    try{
+      const transfer=new DataTransfer();
+      transfer.items.add(file);
+      salesInput.files=transfer.files;
+      salesInput.dispatchEvent(new Event("change",{bubbles:true}));
+      showStatus("Procesando archivo exportado desde Chess…","ok");
+    }catch(error){
+      showStatus("Archivo de Chess seleccionado. Si el formato no coincide, usá Cargar Excel/CSV.","warn");
+    }
+  });
+}
+
+const commercialWeek=document.getElementById("commercialWeek");
+function updateCommercialPeriodTitle(){
+  const title=document.getElementById("commercialTitle");
+  if(!title || !commercialWeek) return;
+  title.textContent=commercialWeek.value==="monthly"
+    ? "Control Comercial Mensual"
+    : "Control Comercial Semanal";
+}
+commercialWeek?.addEventListener("change",updateCommercialPeriodTitle);
+updateCommercialPeriodTitle();
+
+
+(function(){
+  const input=document.getElementById("activeDaysInput");
+  if(!input) return;
+
+  const saved=Number(localStorage.getItem("geoVentasActiveDays") || 60);
+  input.value=Number.isFinite(saved) && saved>0 ? saved : 60;
+
+  input.addEventListener("change",()=>{
+    let value=Math.max(1,Math.min(365,Number(input.value || 60)));
+    input.value=value;
+    localStorage.setItem("geoVentasActiveDays",String(value));
+
+    const province=document.getElementById("provinceSelect");
+    const city=document.getElementById("citySelect");
+    province?.dispatchEvent(new Event("change",{bubbles:true}));
+    city?.dispatchEvent(new Event("change",{bubbles:true}));
+  });
+})();
+
+
+
+
+
+
+
+(function(){
+  const citySelect=document.getElementById("citySelect");
+  const provinceSelect=document.getElementById("provinceSelect");
+
+  window.addEventListener("load",()=>{
+    setTimeout(()=>{
+      if(citySelect?.selectedOptions?.[0]?.textContent?.trim()){
+        citySelect.dispatchEvent(new Event("change",{bubbles:true}));
+      }else if(provinceSelect){
+        provinceSelect.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+    },700);
+  });
+})();
+
+
+const sellerDataV50 = [
+  {name:"Olmos",channel:"Tradicional",products:{"Cerveza 6 x 1000":252}},
+  {name:"Carrizo",channel:"Tradicional",products:{"Cerveza 6 x 1000":50,"Agua sab. 2 x 5":15}},
+  {name:"Castañé",channel:"Tradicional",products:{"Cerveza 6 x 1000":166,"Vinto 6 x 1000":2,"Fernet F-3":2,"Dulce de 1 Kg":14}},
+  {name:"Anzola",channel:"Tradicional",products:{"Cerveza 6 x 1000":24,"Cerveza 6 x 473":2,"Vinto 6 x 1000":2,"Fernet F-3":23,"Dulce de 1 Kg":13}},
+  {name:"Camnas",channel:"Tradicional",products:{"Cerveza 6 x 1000":63,"Agua sab. 2 x 5":11,"Vinto 6 x 1000":2,"Dulce de 1 Kg":37}},
+  {name:"Manuel",channel:"Tradicional",products:{}},
+  {name:"Visdomino",channel:"Tradicional",products:{"Cerveza 6 x 1000":10,"Vinto 6 x 1000":20,"Dulce de 1 Kg":1}},
+  {name:"Almada",channel:"Tradicional",products:{}},
+  {name:"Pravino",channel:"Tradicional",products:{"Cerveza 6 x 1000":33}},
+  {name:"Nasta",channel:"Tradicional",products:{"Cerveza 6 x 1000":26,"Cerveza 6 x 473":2,"Agua sab. 2 x 5":51,"Vinto 6 x 1000":2,"Fernet F-3":27,"Dulce de 1 Kg":6}},
+  {name:"Chamorro",channel:"Tradicional",products:{}},
+  {name:"Arnica",channel:"Tradicional",products:{"Cerveza 6 x 1000":70,"Fernet F-3":30,"Dulce de 1 Kg":3}},
+  {name:"Nuz",channel:"Tradicional",products:{"Cerveza 6 x 1000":7,"Cerveza 6 x 473":1,"Agua sab. 2 x 5":5,"Vinto 6 x 1000":3,"Fernet F-3":6,"Dulce de 1 Kg":17}},
+  {name:"Bloya",channel:"Tradicional",products:{}},
+
+  {name:"Vanesa",channel:"Digital",products:{}},
+  {name:"Daniel",channel:"Digital",products:{}},
+  {name:"Agustín",channel:"Digital",products:{}},
+  {name:"Rodrigo",channel:"Digital",products:{"Cerveza 6 x 1000":168}}
+];
+
+const productSummaryV50 = [
+  {product:"Cerveza 6 x 1000",traditional:701,digital:168,total:869,tradPct:81,digitalPct:19,pallets:5.17},
+  {product:"Cerveza 6 x 473",traditional:5,digital:0,total:5,tradPct:100,digitalPct:0,pallets:0.02},
+  {product:"Agua sab. 2 x 5",traditional:82,digital:0,total:82,tradPct:100,digitalPct:0,pallets:0.98},
+  {product:"Vinto 6 x 1000",traditional:31,digital:0,total:31,tradPct:100,digitalPct:0,pallets:0.18},
+  {product:"Fernet F-3",traditional:88,digital:0,total:88,tradPct:100,digitalPct:0,pallets:0.50},
+  {product:"Dulce de 1 Kg",traditional:91,digital:0,total:91,tradPct:100,digitalPct:0,pallets:0.47}
+];
+
+function sellerTotalV50(seller){
+  return Object.values(seller.products).reduce((a,b)=>a+b,0);
+}
+
+function renderSellerCardsV50(channel, targetId){
+  const target=document.getElementById(targetId);
+  if(!target) return;
+  const rows=sellerDataV50.filter(s=>s.channel===channel);
+  target.innerHTML=rows.map(s=>{
+    const total=sellerTotalV50(s);
+    const chips=Object.entries(s.products);
+    return `<article class="seller-v50-person">
+      <div class="seller-v50-person-head">
+        <div><strong>${s.name}</strong><br><span class="channel-pill ${channel==="Digital"?"channel-digital":"channel-traditional"}">${channel}</span></div>
+        <strong class="seller-v50-total">${total}</strong>
+      </div>
+      <div class="seller-v50-products">
+        ${chips.length?chips.map(([p,v])=>`<span class="seller-v50-chip">${p}: ${v}</span>`).join(""):'<span class="seller-v50-chip">Sin movimiento</span>'}
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function renderProductSummaryV50(){
+  const body=document.getElementById("sellerProductSummary");
+  if(!body) return;
+  body.innerHTML=productSummaryV50.map(r=>`<tr>
+    <td><b>${r.product}</b></td>
+    <td>${r.traditional}</td>
+    <td>${r.digital}</td>
+    <td><b>${r.total}</b></td>
+    <td>${r.tradPct}%</td>
+    <td>${r.digitalPct}%</td>
+    <td>${r.pallets.toFixed(2)}</td>
+  </tr>`).join("");
+}
+
+function renderSellerDetailV50(){
+  const target=document.getElementById("sellerProductDetail");
+  if(!target) return;
+  const rows=[...sellerDataV50].sort((a,b)=>sellerTotalV50(b)-sellerTotalV50(a));
+  target.innerHTML=rows.map(s=>{
+    const total=sellerTotalV50(s);
+    const details=Object.entries(s.products);
+    return `<details class="seller-v50-detail">
+      <summary>
+        <span>${s.name} <span class="channel-pill">${s.channel}</span></span>
+        <span>${total} bultos ▾</span>
+      </summary>
+      <div class="seller-v50-detail-body">
+        ${details.length?details.map(([p,v])=>`<div class="seller-v50-detail-row"><span>${p}</span><b>${v}</b></div>`).join(""):'<div class="seller-v50-detail-row"><span>Sin movimiento informado</span><b>0</b></div>'}
+      </div>
+    </details>`;
+  }).join("");
+}
+
+function updateSellerPeriodV50(){
+  const select=document.getElementById("sellerPeriodSelect");
+  const title=document.getElementById("sellerControlTitle");
+  const monthly=select?.value==="monthly";
+  if(title) title.textContent=monthly?"Control de vendedores mensual":"Control de vendedores semanal";
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  renderSellerCardsV50("Tradicional","traditionalSellerCards");
+  renderSellerCardsV50("Digital","digitalSellerCards");
+  renderProductSummaryV50();
+  renderSellerDetailV50();
+  document.getElementById("sellerPeriodSelect")?.addEventListener("change",updateSellerPeriodV50);
+  updateSellerPeriodV50();
+});
+
+</script>
+</body>
+</html>
